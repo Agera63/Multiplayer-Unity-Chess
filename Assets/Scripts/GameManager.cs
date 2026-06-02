@@ -8,6 +8,11 @@ public class GameManager : MonoBehaviour
     private GameObject selectedPiece;
     private Piece pieceHelperScript;
 
+    private IPlayerController whiteController;
+    private IPlayerController blackController;
+    private IPlayerController currentController;
+
+
     void Start()
     {
         //White always starts

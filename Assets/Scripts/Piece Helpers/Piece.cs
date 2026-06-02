@@ -12,6 +12,8 @@ public abstract class Piece
     {
         isWhite = _isWhite;
         position = _boardPosition;
+
+        PieceManager.instance.AddPiece(this);
     }
 
     public abstract void Move(BoardPos _boardPosition);

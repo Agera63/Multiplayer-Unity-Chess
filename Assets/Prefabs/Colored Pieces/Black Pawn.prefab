@@ -9,6 +9,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 849340070453264054, guid: fb4f53d1c877c5f4f8837fd5c2c8e046, type: 3}
+      propertyPath: isWhite
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 849340070453264054, guid: fb4f53d1c877c5f4f8837fd5c2c8e046, type: 3}
       propertyPath: trigger
       value: 
       objectReference: {fileID: 6562780748792048174}
@@ -60,7 +64,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7450347687488503687, guid: fb4f53d1c877c5f4f8837fd5c2c8e046, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

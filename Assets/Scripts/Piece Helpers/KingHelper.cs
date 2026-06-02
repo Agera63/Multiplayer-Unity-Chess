@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class KingHelper : Piece
 {
-    private bool canCastle;
+    public bool canCastle;
 
     public KingHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition)
     {
