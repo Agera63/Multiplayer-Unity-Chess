@@ -1,16 +1,40 @@
+using System.Collections;
 using UnityEngine;
 
 public class Knight : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] public Collider trigger;
+    [SerializeField] public bool isWhite;
+    public KnightHelper helperClass;
+    public bool isClicked;
+
     void Start()
     {
-        
+
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    public void ShowLegalMoves()
+    {
+
+    }
+
+    IEnumerator MoveAnimation(Vector3 pos)
+    {
+        yield return null;
+    }
+
+    private void ActivateTrigger()
+    {
+        trigger.gameObject.SetActive(true);
+    }
+
+    private void DeactivateTrigger()
+    {
+        trigger.gameObject.SetActive(false);
     }
 }
