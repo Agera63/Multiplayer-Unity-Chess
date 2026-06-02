@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Black Rook
       objectReference: {fileID: 0}
+    - target: {fileID: 5466001432600056112, guid: 22818e294e609b747999fa0719d31900, type: 3}
+      propertyPath: m_TagString
+      value: Rook
+      objectReference: {fileID: 0}
     - target: {fileID: 5853246109287252996, guid: 22818e294e609b747999fa0719d31900, type: 3}
       propertyPath: trigger
       value: 

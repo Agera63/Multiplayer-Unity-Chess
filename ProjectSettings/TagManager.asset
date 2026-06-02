@@ -11,6 +11,7 @@ TagManager:
   - Knight
   - Queen
   - Rook
+  - Board
   layers:
   - Default
   - TransparentFX

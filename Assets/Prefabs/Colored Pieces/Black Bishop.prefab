@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Black Bishop
       objectReference: {fileID: 0}
+    - target: {fileID: 8088346591835640673, guid: 2d00fe2aeb645dd41ba8721e614cc669, type: 3}
+      propertyPath: m_TagString
+      value: Bishop
+      objectReference: {fileID: 0}
     - target: {fileID: 8895810976715803099, guid: 2d00fe2aeb645dd41ba8721e614cc669, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Black King
       objectReference: {fileID: 0}
+    - target: {fileID: 1166455870007051301, guid: b6dd470f8a0ccbc48bf6775755bd68c7, type: 3}
+      propertyPath: m_TagString
+      value: King
+      objectReference: {fileID: 0}
     - target: {fileID: 1980393905073479327, guid: b6dd470f8a0ccbc48bf6775755bd68c7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.83097

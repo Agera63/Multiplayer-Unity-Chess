@@ -39,31 +39,37 @@ public class GameManager : MonoBehaviour
         {
             selectedPiece = clickedObject;
             pieceHelperScript = pawn.helperClass;
+            pawn.ShowLegalMoves();
         }
         else if (clickedObject.TryGetComponent(out Bishop bishop))
         {
             selectedPiece = clickedObject;
             pieceHelperScript = bishop.helperClass;
+            bishop.ShowLegalMoves();
         }
         else if (clickedObject.TryGetComponent(out King king))
         {
             selectedPiece = clickedObject;
             pieceHelperScript = king.helperClass;
+            king.ShowLegalMoves();
         }
         else if (clickedObject.TryGetComponent(out Queen queen))
         {
             selectedPiece = clickedObject;
             pieceHelperScript = queen.helperClass;
+            queen.ShowLegalMoves();
         }
         else if (clickedObject.TryGetComponent(out Knight knight))
         {
             selectedPiece = clickedObject;
             pieceHelperScript = knight.helperClass;
+            knight.ShowLegalMoves();
         }
         else if (clickedObject.TryGetComponent(out Rook rook))
         {
             selectedPiece = clickedObject;
             pieceHelperScript = rook.helperClass;
+            rook.ShowLegalMoves();
         }
         else return;
     }
