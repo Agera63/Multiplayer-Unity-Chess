@@ -10,20 +10,30 @@ public class Pawn : MonoBehaviour
 
     void Start()
     {
-        
+        helperClass = new PawnHelper(
+            isWhite,
+            BoardPos.VectorToBoardPosObject(transform.position),
+            this.gameObject);
     }
 
     void Update()
     {
-        
+
     }
 
-    public void ShowLegalMoves() 
-    { 
-    
+    public void ShowLegalMoves()
+    {
+        helperClass.legalMoves.Clear();
+        helperClass.SetLegalMoves();
+
+        foreach (BoardPos position in helperClass.legalMoves)
+        {
+            GameObject tile = BoardPos.GetTileByPosition(position.PosToString());
+            tile.GetComponent<MeshRenderer>().material.color = Color.blue;
+        }
     }
 
-    IEnumerator MoveAnimation(Vector3 pos)
+    public IEnumerator MoveAnimation(Vector3 pos)
     {
         yield return null;
     }
@@ -36,5 +46,14 @@ public class Pawn : MonoBehaviour
     private void DeactivateTrigger()
     {
         trigger.gameObject.SetActive(false);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent(out BoardTile Bt))
+        {
+            var temp = Bt.boardPosition;
+            //DeactivateTrigger();
+        }
     }
 }

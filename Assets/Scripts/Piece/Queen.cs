@@ -10,7 +10,10 @@ public class Queen : MonoBehaviour
 
     void Start()
     {
-
+        helperClass = new QueenHelper(
+            isWhite,
+            BoardPos.VectorToBoardPosObject(transform.position),
+            this.gameObject);
     }
 
     void Update()
@@ -20,10 +23,17 @@ public class Queen : MonoBehaviour
 
     public void ShowLegalMoves()
     {
+        helperClass.legalMoves.Clear();
+        helperClass.SetLegalMoves();
 
+        foreach (BoardPos position in helperClass.legalMoves)
+        {
+            GameObject tile = BoardPos.GetTileByPosition(position.PosToString());
+            tile.GetComponent<MeshRenderer>().material.color = Color.blue;
+        }
     }
 
-    IEnumerator MoveAnimation(Vector3 pos)
+    public IEnumerator MoveAnimation(Vector3 pos)
     {
         yield return null;
     }

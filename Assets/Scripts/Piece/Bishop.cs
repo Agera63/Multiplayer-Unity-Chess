@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Bishop : MonoBehaviour
@@ -10,7 +11,10 @@ public class Bishop : MonoBehaviour
 
     void Start()
     {
-
+        helperClass = new BishopHelper(
+            isWhite,
+            BoardPos.VectorToBoardPosObject(transform.position),
+            this.gameObject);
     }
 
     void Update()
@@ -20,10 +24,33 @@ public class Bishop : MonoBehaviour
 
     public void ShowLegalMoves()
     {
+        helperClass.legalMoves.Clear();
+        helperClass.SetLegalMoves();
 
+        foreach (BoardPos position in helperClass.legalMoves)
+        {
+            GameObject tile = BoardPos.GetTileByPosition(position.PosToString());
+            tile.GetComponent<MeshRenderer>().material.color = Color.blue;
+        }
     }
 
-    IEnumerator MoveAnimation(Vector3 pos)
+    public void HideLegalMoves()
+    {
+        foreach (BoardPos position in helperClass.legalMoves)
+        {
+            GameObject tile = BoardPos.GetTileByPosition(position.PosToString());
+            if (tile.GetComponent<BoardTile>().isWhite)
+            {
+                tile.GetComponent<MeshRenderer>().material.color = Color.blue;
+            }
+            else
+            {
+                tile.GetComponent<MeshRenderer>().material.color = Color.blue;
+            }
+        }
+    }
+
+    public IEnumerator MoveAnimation(Vector3 pos)
     {
         yield return null;
     }

@@ -27,7 +27,7 @@ public class StockfishController : IPlayerController
         yield return new WaitForSeconds(1f);
 
         // Get move from Stockfish (your existing client)
-        string move = StockFishChessClient.GetBestMoveFromBoard(PieceManager.Board);
+        string move = StockFishChessClient.GetBestMoveFromBoard(PieceManager.GetBoard());
 
         // Convert move string to BoardPos and fire callback
         BoardPos targetPos = BoardPos.StringToPos(move.Substring(3, 2));
