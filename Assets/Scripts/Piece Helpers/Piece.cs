@@ -42,7 +42,7 @@ public abstract class Piece
 
             return IsValidMoveWithCheckValidation(PieceToMove, finalPosition);
         }
-        catch (Exception e)
+        catch
         {
             return false;
         }
@@ -300,7 +300,7 @@ public abstract class Piece
                     }
                 }
             }
-            catch (Exception e)
+            catch
             {
                 return true;
             }
@@ -533,7 +533,7 @@ public abstract class Piece
             }
             return false;
         }
-        catch (Exception e)
+        catch
         {
             return false;
         }

@@ -366,7 +366,7 @@ public class SimulationClass
             }
             return false;
         }
-        catch (Exception e)
+        catch
         {
             return false;
         }
@@ -447,7 +447,7 @@ public class SimulationClass
                     }
                 }
             }
-            catch (Exception e)
+            catch
             {
                 return true;
             }

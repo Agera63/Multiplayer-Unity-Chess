@@ -6,8 +6,7 @@ using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] static GameObject[] allPieceModels;
-    public event Action hideLegalMoves;
+    [SerializeField] GameObject[] allPieceModels;
 
     private bool colorTurn; //True = white turn
     private GameObject selectedPiece;
@@ -65,6 +64,9 @@ public class GameManager : MonoBehaviour
             selectedPiece = clickedObject;
             pieceHelperScript = pawn.helperClass;
             pawn.ShowLegalMoves();
+            
+            //Checks if the promotion action event has the creation method assigned
+            if(!pawn.helperClass.CheckPromotionActions(CreateNewPiece)) pawn.helperClass.promote += CreateNewPiece;
         }
         else if (clickedObject.TryGetComponent(out Bishop bishop) 
             && bishop.isWhite == GameModeManager.instance.playerColor)
@@ -108,7 +110,7 @@ public class GameManager : MonoBehaviour
 
     private void DestroyPiece(Piece pieceToRemove) => Destroy(pieceToRemove.associatedGameObject);
 
-    public static void CreateNewPiece(PieceType type, Vector3 position, bool isWhite)
+    private void CreateNewPiece(PieceType type, Vector3 position, bool isWhite)
     {
         string color = isWhite ? "White" : "Black";
         string pieceName = color + " " + type.ToString();  // ex: "White Bishop"

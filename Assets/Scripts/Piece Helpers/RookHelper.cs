@@ -5,8 +5,6 @@ using static UnityEditor.PlayerSettings;
 public class RookHelper : Piece
 {
     public bool canCastle;
-    private Dictionary<string, string> castlingMap;
-
     private Dictionary<string, string> castlePositions;
 
     //Constructor for deep copy

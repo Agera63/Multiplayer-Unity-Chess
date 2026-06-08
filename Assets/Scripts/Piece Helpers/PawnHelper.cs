@@ -1,11 +1,12 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using static UnityEditor.PlayerSettings;
 
 public class PawnHelper : Piece
 {
     public bool canMove2Squares;
-    public event Action promote;
+    public event Action<PieceType, Vector3, bool> promote;
 
     public PawnHelper(PawnHelper pawn) : base(pawn.isWhite, pawn.position, pawn.associatedGameObject) { }
     public PawnHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition, _associatedGameObject)
@@ -54,8 +55,7 @@ public class PawnHelper : Piece
         else if (pieceToPromote.ToString().ToLower().Equals("n")) promotionSelection = PieceType.Knight;
         else if (pieceToPromote.ToString().ToLower().Equals("r")) promotionSelection = PieceType.Rook;
         else if (pieceToPromote.ToString().ToLower().Equals("b")) promotionSelection = PieceType.Bishop;
-
-        GameManager.CreateNewPiece(promotionSelection,
+        promote?.Invoke(promotionSelection,
             BoardPos.StringToTileVector3(position.PosToString()),
             isWhite);
     }
@@ -71,4 +71,6 @@ public class PawnHelper : Piece
             default: return null;
         }
     }
+
+    public bool CheckPromotionActions(Action<PieceType, Vector3, bool> creationMethod) { return promote?.GetInvocationList().Contains(creationMethod) ?? false; }
 }

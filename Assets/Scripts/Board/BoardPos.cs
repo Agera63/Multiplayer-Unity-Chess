@@ -152,7 +152,7 @@ public class BoardPos
     {
         foreach (GameObject go in GameTiles.ToList())
         {
-            if (go.TryGetComponent(out BoardTile bt));
+            if (go.TryGetComponent(out BoardTile bt))
             {
                 if (bt.transform.position == (position - new Vector3(0, 0.05f, 0))) 
                     return StringToPos(bt.boardPosition);
