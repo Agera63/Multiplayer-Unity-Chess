@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        //if (GameModeManager.instance.playerColor == colorTurn)
+        if (GameModeManager.instance.playerColor == colorTurn)
         {
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {
@@ -47,7 +47,11 @@ public class GameManager : MonoBehaviour
     private void TryMovePiece(BoardPos position)
     {
         char[] mouvementChar = (pieceHelperScript.position.PosToString() + "-" + position.PosToString()).ToCharArray();
-        if (Piece.IsValidMove(mouvementChar)) PieceManager.Update(mouvementChar);
+        if (Piece.IsValidMove(mouvementChar)) 
+        { 
+            PieceManager.Update(mouvementChar);
+            colorTurn = !colorTurn;
+        }
     }
 
     private bool isValidPiece(GameObject clickedObject)
@@ -55,37 +59,43 @@ public class GameManager : MonoBehaviour
         if (pieceHelperScript is not null) pieceHelperScript.HideLegalMoves();
 
         //Checks its a chess piece
-        if (clickedObject.TryGetComponent(out Pawn pawn))
+        if (clickedObject.TryGetComponent(out Pawn pawn) 
+            && pawn.isWhite == GameModeManager.instance.playerColor)
         {
             selectedPiece = clickedObject;
             pieceHelperScript = pawn.helperClass;
             pawn.ShowLegalMoves();
         }
-        else if (clickedObject.TryGetComponent(out Bishop bishop))
+        else if (clickedObject.TryGetComponent(out Bishop bishop) 
+            && bishop.isWhite == GameModeManager.instance.playerColor)
         {
             selectedPiece = clickedObject;
             pieceHelperScript = bishop.helperClass;
             bishop.ShowLegalMoves();
         }
-        else if (clickedObject.TryGetComponent(out King king))
+        else if (clickedObject.TryGetComponent(out King king)
+            && king.isWhite == GameModeManager.instance.playerColor)
         {
             selectedPiece = clickedObject;
             pieceHelperScript = king.helperClass;
             king.ShowLegalMoves();
         }
-        else if (clickedObject.TryGetComponent(out Queen queen))
+        else if (clickedObject.TryGetComponent(out Queen queen)
+            && queen.isWhite == GameModeManager.instance.playerColor)
         {
             selectedPiece = clickedObject;
             pieceHelperScript = queen.helperClass;
             queen.ShowLegalMoves();
         }
-        else if (clickedObject.TryGetComponent(out Knight knight))
+        else if (clickedObject.TryGetComponent(out Knight knight)
+            && knight.isWhite == GameModeManager.instance.playerColor)
         {
             selectedPiece = clickedObject;
             pieceHelperScript = knight.helperClass;
             knight.ShowLegalMoves();
         }
-        else if (clickedObject.TryGetComponent(out Rook rook))
+        else if (clickedObject.TryGetComponent(out Rook rook)
+            && rook.isWhite == GameModeManager.instance.playerColor)
         {
             selectedPiece = clickedObject;
             pieceHelperScript = rook.helperClass;
