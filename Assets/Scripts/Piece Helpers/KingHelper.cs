@@ -60,6 +60,7 @@ public class KingHelper : Piece
             }
             canCastle = false;
         }
+        canCastle = false;
         PieceManager.SetBoard(temporaryBoard);
         associatedGameObject.GetComponent<MonoBehaviour>()
             .StartCoroutine(associatedGameObject.GetComponent<King>()

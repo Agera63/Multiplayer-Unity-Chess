@@ -50,6 +50,7 @@ public class RookHelper : Piece
             this.position = _finalBoardPosition;
         }
         PieceManager.SetBoard(temporaryBoard);
+        canCastle = false;
         associatedGameObject.GetComponent<MonoBehaviour>()
             .StartCoroutine(associatedGameObject.GetComponent<Rook>()
             .MoveAnimation(BoardPos.StringToTileVector3(_finalBoardPosition.PosToString())));
@@ -68,6 +69,7 @@ public class RookHelper : Piece
         temporaryBoard[BoardPos.StringToPos(placeToMove).num, BoardPos.StringToPos(placeToMove).letter] = this.icon;
         this.position = BoardPos.StringToPos(placeToMove);
 
+        canCastle = false;
         associatedGameObject.GetComponent<MonoBehaviour>()
             .StartCoroutine(associatedGameObject.GetComponent<Rook>()
             .MoveAnimation(BoardPos.StringToTileVector3(placeToMove)));
