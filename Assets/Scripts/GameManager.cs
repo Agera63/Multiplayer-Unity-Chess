@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
         selectedPiece = null;
 
         PieceManager.InitializeBoard();
+        PieceManager.removeGameObj += DestroyPiece;
     }
 
     void Update()
@@ -35,18 +36,18 @@ public class GameManager : MonoBehaviour
             {
                 GameObject clickedObject = ClickHelper.FindClickedObject();
 
-                if (isValidPiece(clickedObject))
-                    return;
-                else if (clickedObject.TryGetComponent(out BoardTile bt) && selectedPiece is not null)
+                if (clickedObject.TryGetComponent(out BoardTile bt) && selectedPiece is not null)
                     TryMovePiece(BoardPos.StringToPos(bt.boardPosition));
+                else if (isValidPiece(clickedObject))
+                    return;
             }
         }
     }
 
     private void TryMovePiece(BoardPos position)
     {
-        //use selectedPiece for the move
-        pieceHelperScript.Move(position);
+        char[] mouvementChar = (pieceHelperScript.position.PosToString() + "-" + position.PosToString()).ToCharArray();
+        if (Piece.IsValidMove(mouvementChar)) PieceManager.Update(mouvementChar);
     }
 
     private bool isValidPiece(GameObject clickedObject)
@@ -95,6 +96,8 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    private void DestroyPiece(Piece pieceToRemove) => Destroy(pieceToRemove.associatedGameObject);
+
     public static void CreateNewPiece(PieceType type, Vector3 position, bool isWhite)
     {
         string color = isWhite ? "White" : "Black";
@@ -109,4 +112,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    
 }

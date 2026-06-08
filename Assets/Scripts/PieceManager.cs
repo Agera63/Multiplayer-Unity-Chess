@@ -7,6 +7,8 @@ public class PieceManager
     private static char[,] Board = new char[8, 8];
     public static HashSet<Piece> AllPieces = new();
 
+    public static event Action<Piece> removeGameObj;
+
     /// <summary>
     /// Getter for the board with the pieces
     /// </summary>
@@ -48,6 +50,7 @@ public class PieceManager
         {
             if (!p.isActive)
             {
+                removeGameObj?.Invoke(p);
                 AllPieces.Remove(p);
                 /*DO NOT REMOVE BREAK!!!
                 If you remove the break, the list would have been altered and then it will throw an error */

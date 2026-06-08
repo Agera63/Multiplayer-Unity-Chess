@@ -16,6 +16,14 @@ PrefabInstance:
       propertyPath: trigger
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2982416391619031832, guid: 2d00fe2aeb645dd41ba8721e614cc669, type: 3}
+      propertyPath: isClicked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2982416391619031832, guid: 2d00fe2aeb645dd41ba8721e614cc669, type: 3}
+      propertyPath: animationTime
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6896068902072244743, guid: 2d00fe2aeb645dd41ba8721e614cc669, type: 3}
       propertyPath: m_IsTrigger
       value: 0

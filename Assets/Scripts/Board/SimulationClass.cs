@@ -35,19 +35,13 @@ public class SimulationClass
     public static bool WillMoveCheckKing(Piece pieceToMove, BoardPos finalPos)
     {
         KingHelper kingToCheck;
-        if (pieceToMove is KingHelper)
-        {
-            kingToCheck = (KingHelper) pieceToMove;
-        }
+        if (pieceToMove is KingHelper) 
+            kingToCheck = (KingHelper)pieceToMove;
         else
-        {
             kingToCheck = pieceToMove.isWhite ? KingHelper.FindWhiteKing() : KingHelper.FindBlackKing();
-        }
 
-        if (kingToCheck == null)
-        {
-            return false;
-        }
+
+        if (kingToCheck == null) return false;
 
         SimulationClass sc = new SimulationClass(kingToCheck);
         Piece simPiece = sc.FindPieceOfPosSim(pieceToMove.position);
@@ -60,7 +54,8 @@ public class SimulationClass
         char[] movementCharSim = (pieceToMove.position.PosToString() + "-" + finalPos.PosToString()).ToCharArray();
         sc.UpdateSim(movementCharSim);
 
-        return !sc.IsKingCheckedSim(sc.KingToMove);
+        //add line to check the bool and the error
+        return !sc.IsKingCheckedSim(sc.KingToMove); 
     }
 
     public static bool IsCheckMate(KingHelper k)
@@ -99,7 +94,7 @@ public class SimulationClass
     {
         foreach (Piece p in GOCopy)
         {
-            if (p.position.letter == K.position.letter && p.position.num == K.position.num && p is King)
+            if (p.position.letter == K.position.letter && p.position.num == K.position.num && p is KingHelper)
             {
                 return (KingHelper)p;
             }

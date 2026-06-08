@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using UnityEngine;
 
@@ -7,6 +8,10 @@ public class Pawn : MonoBehaviour
     [SerializeField] public bool isWhite;
     public PawnHelper helperClass;
     public bool isClicked;
+
+    private readonly float AnimationTimer = 1f; //seconds
+    private float timer = 0;
+
 
     void Start()
     {
@@ -35,25 +40,21 @@ public class Pawn : MonoBehaviour
 
     public IEnumerator MoveAnimation(Vector3 pos)
     {
-        yield return null;
-    }
-
-    private void ActivateTrigger()
-    {
-        trigger.gameObject.SetActive(true);
-    }
-
-    private void DeactivateTrigger()
-    {
-        trigger.gameObject.SetActive(false);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent(out BoardTile Bt))
+        helperClass.HideLegalMoves();
+        while (timer <= AnimationTimer)
         {
-            var temp = Bt.boardPosition;
-            //DeactivateTrigger();
+            timer += Time.deltaTime;
+
+            var percentageMouvementDone = timer / AnimationTimer;
+
+            Vector3 currentPositionByPercentage = Vector3.Lerp(transform.position, pos, percentageMouvementDone);
+            transform.position = new Vector3(currentPositionByPercentage.x, currentPositionByPercentage.y, currentPositionByPercentage.z);
+            
+            yield return null;
         }
+
+        //Reset everything
+        isClicked = false;
+        timer = 0;
     }
 }

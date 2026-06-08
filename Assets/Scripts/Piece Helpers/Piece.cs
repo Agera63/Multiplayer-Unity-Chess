@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using TMPro.EditorUtilities;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 public abstract class Piece
 {
     public GameObject associatedGameObject;
@@ -13,7 +10,7 @@ public abstract class Piece
     public char icon;
     public bool isActive;
 
-    private static Dictionary<string, string> castlingMap;
+    protected static Dictionary<string, string> castlingMap;
 
     //resets every moves + not defiend
     public HashSet<BoardPos> legalMoves = new();
@@ -29,7 +26,27 @@ public abstract class Piece
 
     public abstract void Move(BoardPos _boardPosition);
 
-    public abstract bool IsValidMove(BoardPos start, BoardPos end);
+    public static bool IsValidMove(char[] MovementChar)
+    {
+        BoardPos finalPosition = BoardPos.StringToPos(MovementChar[3].ToString() +
+                    MovementChar[4].ToString().ToLower());
+        Piece PieceToMove = FindPieceAtPos(BoardPos.StringToPos(MovementChar[0].ToString() +
+                MovementChar[1].ToString().ToLower()));
+
+        try
+        {
+            if (PieceToMove == null || PieceToMove.isWhite != GameModeManager.instance.playerColor)
+            {
+                return false;
+            }
+
+            return IsValidMoveWithCheckValidation(PieceToMove, finalPosition);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
 
     public static Piece FindPieceAtPos(BoardPos Pos)
     {
@@ -65,14 +82,7 @@ public abstract class Piece
         }
         else
         {
-            if (pieceToMove is King)
-            {
-                return SimulationClass.WillMoveCheckKing(pieceToMove, finalPosition);
-            }
-            else
-            {
-                return SimulationClass.WillMoveCheckKing(pieceToMove, finalPosition);
-            }
+            return SimulationClass.WillMoveCheckKing(pieceToMove, finalPosition);
         }
     }
 
@@ -433,7 +443,7 @@ public abstract class Piece
                     }
                 }
                 else if ((movementType.Equals("vertical") || movementType.Equals("horizontal") ||
-                        movementType.Equals("diagonal") && PieceToMove is KingHelper))
+                        movementType.Equals("diagonal")) && PieceToMove is KingHelper)
                 {
                     string strFinalPos = finalPosition.PosToString();
                     if (movementType.Equals("horizontal") && (strFinalPos.Equals("g1") || strFinalPos.Equals("c1") ||
@@ -444,14 +454,16 @@ public abstract class Piece
                         KingHelper king = (KingHelper)PieceToMove;
 
                         // CRITICAL: Cannot castle if king is in check
-                        if (king.IsChecked())
-                        {
-                            return false;
-                        }
+                        if (king.IsChecked()) return false;
 
                         RookHelper r = (RookHelper)FindPieceAtPos(BoardPos.StringToPos(castlingMap[strFinalPos]));
+
+                        Debug.Log($"King canCastle: {king.canCastle} | Rook canCastle: {r.canCastle} | Same color: {king.isWhite == r.isWhite}");
                         if (PieceManager.CanCastle(r, king))
                         {
+                            Debug.Log($"CanCastle passed, checking path for {strFinalPos}");
+                            Debug.Log($"AnyPieceBlocking: {PieceToMove.AnyPieceBlocking(BoardPos.StringToPos(strFinalPos), movementType)}");
+
                             // Check if path is clear AND king doesn't pass through check
                             if (strFinalPos.Equals("g1") &&
                                     !PieceToMove.AnyPieceBlocking(BoardPos.StringToPos("g1"), movementType) &&
@@ -551,7 +563,7 @@ public abstract class Piece
             for (int letter = 0; letter < 8; letter++)
             {
                 BoardPos boardPositionToCheck = new BoardPos(number, letter);
-                if (CheckPieceMovement(this, boardPositionToCheck))
+                if (IsValidMoveWithCheckValidation(this, boardPositionToCheck))
                 {
                     legalMoves.Add(boardPositionToCheck);
                 }

@@ -8,6 +8,9 @@ public class King : MonoBehaviour
     public KingHelper helperClass;
     public bool isClicked;
 
+    private readonly float AnimationTimer = 1f; //seconds
+    private float timer = 0;
+
     void Start()
     {
         helperClass = new KingHelper(
@@ -35,7 +38,22 @@ public class King : MonoBehaviour
 
     public IEnumerator MoveAnimation(Vector3 pos)
     {
-        yield return null;
+        helperClass.HideLegalMoves();
+        while (timer <= AnimationTimer)
+        {
+            timer += Time.deltaTime;
+
+            var percentageMouvementDone = timer / AnimationTimer;
+
+            Vector3 currentPositionByPercentage = Vector3.Lerp(transform.position, pos, percentageMouvementDone);
+            transform.position = new Vector3(currentPositionByPercentage.x, currentPositionByPercentage.y, currentPositionByPercentage.z);
+
+            yield return null;
+        }
+
+        //Reset everything
+        isClicked = false;
+        timer = 0;
     }
 
     private void ActivateTrigger()

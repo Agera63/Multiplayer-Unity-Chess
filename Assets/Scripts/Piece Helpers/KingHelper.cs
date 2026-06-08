@@ -16,19 +16,54 @@ public class KingHelper : Piece
         PieceManager.AllPieces.Add(this);
     }
 
-    public override bool IsValidMove(BoardPos start, BoardPos end)
-    {
-        throw new System.NotImplementedException();
-    }
-
     public override void Move(BoardPos _finalBoardPosition)
     {
-        if (IsValidMove(position, _finalBoardPosition))
+        char[,] temporaryBoard = PieceManager.GetBoard();
+        string strPosition = _finalBoardPosition.PosToString();
+
+        // Checks if we want to castle the king
+        if ((strPosition.Equals("g1") || strPosition.Equals("c1") ||
+                strPosition.Equals("g8") || strPosition.Equals("c8")) && !this.IsChecked())
         {
-            associatedGameObject.GetComponent<MonoBehaviour>()
-                .StartCoroutine(associatedGameObject.GetComponent<King>()
-                .MoveAnimation(BoardPos.StringToTileVector3(_finalBoardPosition.PosToString())));
+            RookHelper r = (RookHelper)Piece.FindPieceAtPos(BoardPos.StringToPos(Piece.castlingMap[strPosition]));
+            if (PieceManager.CanCastle(r, this))
+            {
+                temporaryBoard[this.position.num, this.position.letter] = '\0';
+                temporaryBoard[BoardPos.StringToPos(strPosition).num, BoardPos.StringToPos(strPosition).letter] = this.icon;
+                this.position = BoardPos.StringToPos(strPosition);
+                temporaryBoard = r.CastleMovement(temporaryBoard, strPosition);
+            }
         }
+        else
+        {
+            if (!this.CheckPosToMove(this, BoardPos.StringToPos(strPosition), true))
+            {
+                // if we are in this condition, it means that there is a piece of the opposite color that will be removed.
+                foreach (Piece p in PieceManager.AllPieces)
+                {
+                    string PStringPosition = p.position.PosToString();
+                    if (strPosition.Equals(PStringPosition))
+                    {
+                        p.isActive = false;
+                        temporaryBoard[this.position.num, this.position.letter] = '\0';
+                        temporaryBoard[BoardPos.StringToPos(strPosition).num, BoardPos.StringToPos(strPosition).letter] = this.icon;
+                        this.position = BoardPos.StringToPos(strPosition);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                temporaryBoard[this.position.num, this.position.letter] = '\0';
+                temporaryBoard[BoardPos.StringToPos(strPosition).num, BoardPos.StringToPos(strPosition).letter] = this.icon;
+                this.position = BoardPos.StringToPos(strPosition);
+            }
+            canCastle = false;
+        }
+        PieceManager.SetBoard(temporaryBoard);
+        associatedGameObject.GetComponent<MonoBehaviour>()
+            .StartCoroutine(associatedGameObject.GetComponent<King>()
+            .MoveAnimation(BoardPos.StringToTileVector3(_finalBoardPosition.PosToString())));
     }
 
     /// <summary>
