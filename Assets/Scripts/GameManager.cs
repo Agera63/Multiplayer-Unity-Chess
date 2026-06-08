@@ -35,10 +35,20 @@ public class GameManager : MonoBehaviour
             {
                 GameObject clickedObject = ClickHelper.FindClickedObject();
 
-                if (clickedObject.TryGetComponent(out BoardTile bt) && selectedPiece is not null)
-                    TryMovePiece(BoardPos.StringToPos(bt.boardPosition));
-                else if (isValidPiece(clickedObject))
+                if (isValidPiece(clickedObject))
                     return;
+                
+                //When a piece is selected and has legalMoves available, you enter the if
+                if (selectedPiece is not null && pieceHelperScript.legalMoves.Count != 0)
+                {
+                    //if you clicked a board tile, move to its position
+                    if (clickedObject.TryGetComponent(out BoardTile bt))
+                        TryMovePiece(BoardPos.StringToPos(bt.boardPosition));
+                    //if you clicked on a piece of different color, see if that move is legal, then move
+                    else if (clickedObject.TryGetComponent(out MonoBehaviorPiece MBp) 
+                        && MBp.isWhite != GameModeManager.instance.playerColor)
+                        TryMovePiece(MBp.helperClass.position);
+                }
             }
         }
     }
@@ -50,6 +60,10 @@ public class GameManager : MonoBehaviour
         { 
             PieceManager.Update(mouvementChar);
             colorTurn = !colorTurn;
+
+            //Resets selected piece
+            selectedPiece = null;
+            pieceHelperScript = null;
         }
     }
 
@@ -66,7 +80,7 @@ public class GameManager : MonoBehaviour
             pawn.ShowLegalMoves();
             
             //Checks if the promotion action event has the creation method assigned
-            if(!pawn.helperClass.CheckPromotionActions(CreateNewPiece)) pawn.helperClass.promote += CreateNewPiece;
+            if (!((PawnHelper) pawn.helperClass).CheckPromotionActions(CreateNewPiece)) ((PawnHelper) pawn.helperClass).promote += CreateNewPiece;
         }
         else if (clickedObject.TryGetComponent(out Bishop bishop) 
             && bishop.isWhite == GameModeManager.instance.playerColor)
@@ -108,6 +122,7 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    //Add sound for every Destroyed piece
     private void DestroyPiece(Piece pieceToRemove) => Destroy(pieceToRemove.associatedGameObject);
 
     private void CreateNewPiece(PieceType type, Vector3 position, bool isWhite)
