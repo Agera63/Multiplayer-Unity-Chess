@@ -458,12 +458,8 @@ public abstract class Piece
 
                         RookHelper r = (RookHelper)FindPieceAtPos(BoardPos.StringToPos(castlingMap[strFinalPos]));
 
-                        Debug.Log($"King canCastle: {king.canCastle} | Rook canCastle: {r.canCastle} | Same color: {king.isWhite == r.isWhite}");
                         if (PieceManager.CanCastle(r, king))
                         {
-                            Debug.Log($"CanCastle passed, checking path for {strFinalPos}");
-                            Debug.Log($"AnyPieceBlocking: {PieceToMove.AnyPieceBlocking(BoardPos.StringToPos(strFinalPos), movementType)}");
-
                             // Check if path is clear AND king doesn't pass through check
                             if (strFinalPos.Equals("g1") &&
                                     !PieceToMove.AnyPieceBlocking(BoardPos.StringToPos("g1"), movementType) &&
