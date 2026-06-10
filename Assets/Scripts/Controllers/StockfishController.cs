@@ -7,30 +7,25 @@ public class StockfishController : IPlayerController
 {
     public bool IsHuman => false;
     public bool isWhite;
-
     private MonoBehaviour coroutineRunner;
+    private Action<string> onMoveReady;
 
-    // Needs a MonoBehaviour to run coroutines since this isn't one
     public StockfishController(MonoBehaviour runner, bool _isWhite)
     {
         isWhite = _isWhite;
         coroutineRunner = runner;
     }
 
-    public void StartTurn(Action<BoardPos> onMoveReady)
+    public void StartTurn(Action<string> onMoveReady)
     {
-        coroutineRunner.StartCoroutine(GetStockfishMove(onMoveReady));
+        this.onMoveReady = onMoveReady;
+        coroutineRunner.StartCoroutine(GetStockfishMove());
     }
 
-    IEnumerator GetStockfishMove(Action<BoardPos> onMoveReady)
+    IEnumerator GetStockfishMove()
     {
         yield return new WaitForSeconds(1f);
-
-        // Get move from Stockfish (your existing client)
         string move = StockFishChessClient.GetBestMoveFromBoard(PieceManager.GetBoard());
-
-        // Convert move string to BoardPos and fire callback
-        BoardPos targetPos = BoardPos.StringToPos(move.Substring(3, 2));
-        onMoveReady?.Invoke(targetPos);
+        onMoveReady?.Invoke(move);
     }
 }

@@ -8,7 +8,7 @@ public class PawnHelper : Piece
     public bool canMove2Squares;
     public event Action<PieceType, Vector3, bool> promote;
 
-    public PawnHelper(PawnHelper pawn) : base(pawn.isWhite, pawn.position, pawn.associatedGameObject) { }
+    public PawnHelper(PawnHelper pawn) : base(pawn.isWhite, pawn.position, pawn.associatedGameObject) { icon = pawn.isWhite ? 'P' : 'p'; }
     public PawnHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition, _associatedGameObject)
     {
         icon = _isWhite ? 'P' : 'p';
@@ -26,7 +26,7 @@ public class PawnHelper : Piece
             foreach (Piece p in PieceManager.AllPieces)
             {
                 string PStringPosition = p.position.PosToString();
-                if (_finalBoardPosition.PosToString().Equals(PStringPosition))
+                if (_finalBoardPosition.PosToString().Equals(PStringPosition) && p.isActive)
                 {
                     p.isActive = false;
                     temporaryBoard[this.position.num, this.position.letter] = '\0';

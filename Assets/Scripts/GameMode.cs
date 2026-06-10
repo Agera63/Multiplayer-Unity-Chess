@@ -3,5 +3,6 @@ using UnityEngine;
 public enum GameMode
 {
     PvE,
-    PvP
+    PvP,
+    PvP_Online
 }

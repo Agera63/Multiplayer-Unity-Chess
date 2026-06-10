@@ -8,10 +8,10 @@ public class RookHelper : Piece
     private Dictionary<string, string> castlePositions;
 
     //Constructor for deep copy
-    public RookHelper(RookHelper rook) : base(rook.isWhite, rook.position, rook.associatedGameObject) { canCastle = true; }
-    
+    public RookHelper(RookHelper rook) : base(rook.isWhite, rook.position, rook.associatedGameObject) { icon = rook.isWhite ? 'R' : 'r'; canCastle = true; }
+
     //Constructor for promotion
-    public RookHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition, null) { canCastle = true; }
+    public RookHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition, null) { icon = _isWhite ? 'R' : 'r'; canCastle = true; }
 
     //Default contructor for instantiations
     public RookHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition, _associatedGameObject)
@@ -31,7 +31,7 @@ public class RookHelper : Piece
             foreach (Piece p in PieceManager.AllPieces)
             {
                 string PStringPosition = p.position.PosToString();
-                if (_finalBoardPosition.PosToString().Equals(PStringPosition))
+                if (_finalBoardPosition.PosToString().Equals(PStringPosition) && p.isActive)
                 {
                     p.isActive = false;
                     temporaryBoard[this.position.num, this.position.letter] = '\0';

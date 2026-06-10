@@ -7,7 +7,7 @@ public class KingHelper : Piece
 {
     public bool canCastle;
 
-    public KingHelper(KingHelper king) : base(king.isWhite, king.position, king.associatedGameObject) { canCastle = king.canCastle; }
+    public KingHelper(KingHelper king) : base(king.isWhite, king.position, king.associatedGameObject) { icon = king.isWhite ? 'K' : 'k'; canCastle = king.canCastle; }
     public KingHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition, _associatedGameObject)
     {
         icon = _isWhite ? 'K' : 'k';
@@ -42,7 +42,7 @@ public class KingHelper : Piece
                 foreach (Piece p in PieceManager.AllPieces)
                 {
                     string PStringPosition = p.position.PosToString();
-                    if (strPosition.Equals(PStringPosition))
+                    if (strPosition.Equals(PStringPosition) && p.isActive)
                     {
                         p.isActive = false;
                         temporaryBoard[this.position.num, this.position.letter] = '\0';

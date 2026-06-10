@@ -26,7 +26,7 @@ public abstract class Piece
 
     public abstract void Move(BoardPos _boardPosition);
 
-    public static bool IsValidMove(char[] MovementChar)
+    public static bool IsValidMove(char[] MovementChar, bool isWhiteTurn)
     {
         BoardPos finalPosition = BoardPos.StringToPos(MovementChar[3].ToString() +
                     MovementChar[4].ToString().ToLower());
@@ -35,14 +35,18 @@ public abstract class Piece
 
         try
         {
-            if (PieceToMove == null || PieceToMove.isWhite != GameModeManager.instance.playerColor)
+            // CHANGE: check against whose turn it is, not player color
+            if (PieceToMove == null || PieceToMove.isWhite != isWhiteTurn)
             {
                 return false;
             }
 
-            return IsValidMoveWithCheckValidation(PieceToMove, finalPosition);
+            bool movementValid = CheckPieceMovement(PieceToMove, finalPosition);
+
+            bool result = IsValidMoveWithCheckValidation(PieceToMove, finalPosition);
+            return result;
         }
-        catch
+        catch (Exception e)
         {
             return false;
         }
@@ -52,7 +56,7 @@ public abstract class Piece
     {
         foreach (Piece p in PieceManager.AllPieces)
         {
-            if (p.position.num == Pos.num && p.position.letter == Pos.letter)
+            if (p.isActive && p.position.num == Pos.num && p.position.letter == Pos.letter)
             {
                 return p;
             }
@@ -90,6 +94,7 @@ public abstract class Piece
     {
         foreach (Piece tempPiece in PieceManager.AllPieces)
         {
+            if (!tempPiece.isActive) continue;
             if (condition)
             {
                 if (posToMove.num == tempPiece.position.num && posToMove.letter == tempPiece.position.letter)
@@ -321,7 +326,7 @@ public abstract class Piece
                     {
                         if (PieceToMove.CheckPosToMove(PieceToMove, finalPosition, true) &&
                                 (BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1) &&
-                                finalPosition.num - PieceToMove.position.num > 0)
+                                finalPosition.num - PieceToMove.position.num > 0 && !PieceToMove.AnyPieceBlocking(finalPosition, movementType))
                         {
                             ((PawnHelper)PieceToMove).canMove2Squares = false;
                             return true;
@@ -329,9 +334,9 @@ public abstract class Piece
                         else if (PieceToMove.CheckPosToMove(PieceToMove, finalPosition, true) &&
                                 ((BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 2 &&
                                         PieceToMove.position.num == 1)) &&
-                                finalPosition.num - PieceToMove.position.num > 0)
+                                finalPosition.num - PieceToMove.position.num > 0 && !PieceToMove.AnyPieceBlocking(finalPosition, movementType))
                         {
-                            ((PawnHelper)PieceToMove).canMove2Squares = true;
+                            ((PawnHelper)PieceToMove).canMove2Squares = false;
                             return true;
                         }
                     }
@@ -347,9 +352,9 @@ public abstract class Piece
                         else if (PieceToMove.CheckPosToMove(PieceToMove, finalPosition, true) &&
                                 ((BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 2 &&
                                         PieceToMove.position.num == 6)) &&
-                                PieceToMove.position.num - finalPosition.num > 0)
+                                PieceToMove.position.num - finalPosition.num > 0 && !PieceToMove.AnyPieceBlocking(finalPosition, movementType))
                         {
-                            ((PawnHelper)PieceToMove).canMove2Squares = true;
+                            ((PawnHelper)PieceToMove).canMove2Squares = false;
                             return true;
                         }
                     }
@@ -506,13 +511,12 @@ public abstract class Piece
                 }
                 else if (movementType.Equals("knight") && PieceToMove is KnightHelper)
                 {
-                    if (!PieceToMove.CheckPosToMove(PieceToMove, finalPosition, false) &&
-                            FindPieceAtPos(finalPosition) != null &&
-                            FindPieceAtPos(finalPosition).isWhite == !PieceToMove.isWhite)
+                    Piece targetPiece = FindPieceAtPos(finalPosition);
+                    if (targetPiece != null && targetPiece.isWhite != PieceToMove.isWhite)
                     {
                         return true;
                     }
-                    else if (PieceToMove.CheckPosToMove(PieceToMove, finalPosition, true))
+                    else if (targetPiece == null)
                     {
                         return true;
                     }
@@ -569,17 +573,18 @@ public abstract class Piece
 
     public void HideLegalMoves()
     {
-        foreach(GameObject go in BoardPos.GameTiles)
+        foreach (GameObject go in BoardPos.GameTiles)
         {
-            var boardTileScript = go.GetComponent<BoardTile>(); 
+            var boardTileScript = go.GetComponent<BoardTile>();
             var meshRender = go.GetComponent<MeshRenderer>();
-            
-            if(meshRender.material.color == Color.blue)
+
+            if (meshRender.material.color == Color.blue)
             {
                 if (boardTileScript.isWhite)
                 {
                     meshRender.material.color = Color.white;
-                } else
+                }
+                else
                 {
                     meshRender.material.color = Color.black;
                 }
@@ -587,6 +592,3 @@ public abstract class Piece
         }
     }
 }
-
-
-

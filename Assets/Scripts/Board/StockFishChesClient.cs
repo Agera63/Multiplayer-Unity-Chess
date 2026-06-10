@@ -1,12 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using UnityEngine;
 
 namespace ChessClient
 {
     public class StockFishChessClient
     {
-        private static readonly string STOCKFISH_PATH;
+        private static readonly string STOCKFISH_PATH = Application.streamingAssetsPath + "/Stockfish/stockfish-windows-x86-64";
         private static readonly int SEARCH_DEPTH = 15;
         private static readonly string[] UCI_INIT_COMMANDS = { "uci" };
 
@@ -23,7 +24,6 @@ namespace ChessClient
         public static string GetBestMoveFromBoard(char[,] board)
         {
             string fen = BoardToFen(board);
-
             try
             {
                 InitializeStockfishProcess();

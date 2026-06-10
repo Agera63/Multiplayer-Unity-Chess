@@ -1,14 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections;
+using TMPro;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] GameObject[] allPieceModels;
-
-    private bool colorTurn; //True = white turn
+    [SerializeField] GameObject player;
+    [SerializeField] GameObject gameOverText;
+        
+    private bool colorTurn;
     private GameObject selectedPiece;
     private Piece pieceHelperScript;
 
@@ -16,20 +19,28 @@ public class GameManager : MonoBehaviour
     private IPlayerController blackController;
     private IPlayerController currentController;
 
+    private bool whoWon;
 
     void Start()
     {
-        //White always starts
+        //Initalizes the player position
+        if (GameModeManager.instance.playerColor) Instantiate(player, new Vector3(0.5f, 5.5f, -2.5f), Quaternion.Euler(new Vector3(45, 0,0)));
+        else Instantiate(player, new Vector3(0.5f, 5.5f, 10f), Quaternion.Euler(new Vector3(45, 180, 0)));
+
         colorTurn = true;
         selectedPiece = null;
 
         PieceManager.InitializeBoard();
         PieceManager.removeGameObj += DestroyPiece;
+
+        AssignControllers();
+
+        StartTurn();
     }
 
     void Update()
     {
-        if (GameModeManager.instance.playerColor == colorTurn)
+        if (currentController != null && currentController.IsHuman)
         {
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {
@@ -37,52 +48,101 @@ public class GameManager : MonoBehaviour
 
                 if (isValidPiece(clickedObject))
                     return;
-                
-                //When a piece is selected and has legalMoves available, you enter the if
+
                 if (selectedPiece is not null && pieceHelperScript.legalMoves.Count != 0)
                 {
-                    //if you clicked a board tile, move to its position
                     if (clickedObject.TryGetComponent(out BoardTile bt))
-                        TryMovePiece(BoardPos.StringToPos(bt.boardPosition));
-                    //if you clicked on a piece of different color, see if that move is legal, then move
-                    else if (clickedObject.TryGetComponent(out MonoBehaviorPiece MBp) 
+                    {
+                        string moveString = pieceHelperScript.position.PosToString() + "-" + bt.boardPosition;
+                        humanController?.MakeMove(moveString);
+                    }
+                    else if (clickedObject.TryGetComponent(out MonoBehaviorPiece MBp)
                         && MBp.isWhite != GameModeManager.instance.playerColor)
-                        TryMovePiece(MBp.helperClass.position);
+                    {
+                        string moveString = pieceHelperScript.position.PosToString() + "-" + MBp.helperClass.position.PosToString();
+                        humanController?.MakeMove(moveString);
+                    }
                 }
             }
         }
     }
 
-    private void TryMovePiece(BoardPos position)
+    private void StartTurn()
     {
-        char[] mouvementChar = (pieceHelperScript.position.PosToString() + "-" + position.PosToString()).ToCharArray();
-        if (Piece.IsValidMove(mouvementChar)) 
-        { 
+        currentController = colorTurn ? whiteController : blackController;
+        currentController.StartTurn((moveString) => TryMovePiece(moveString));
+    }
+
+    private void TryMovePiece(string moveString)
+    {
+        char[] mouvementChar = moveString.ToCharArray();
+        if (Piece.IsValidMove(mouvementChar, colorTurn))
+        {
             PieceManager.Update(mouvementChar);
             colorTurn = !colorTurn;
 
-            //Resets selected piece
             selectedPiece = null;
             pieceHelperScript = null;
+
+            //Checks if game is over
+            if (IsGameOver())
+                StartCoroutine(CheckMateSteps());
+
+            //Starts the next turn after every successful move
+            StartTurn();
         }
     }
+
+    private void AssignControllers()
+    {
+        bool playerIsWhite = GameModeManager.instance.playerColor;
+
+        switch (GameModeManager.instance.selectedMode)
+        {
+            case GameMode.PvE:
+                if (playerIsWhite)
+                {
+                    whiteController = new HumanController();
+                    blackController = new StockfishController(this, false);
+                }
+                else
+                {
+                    whiteController = new StockfishController(this, true);
+                    blackController = new HumanController();
+                }
+                break;
+
+            case GameMode.PvP_Online:
+                if (playerIsWhite)
+                {
+                    whiteController = new HumanController();
+                    blackController = new NetworkController();
+                }
+                else
+                {
+                    whiteController = new NetworkController();
+                    blackController = new HumanController();
+                }
+                break;
+        }
+    }
+
+    private HumanController humanController => currentController as HumanController;
 
     private bool isValidPiece(GameObject clickedObject)
     {
         if (pieceHelperScript is not null) pieceHelperScript.HideLegalMoves();
 
-        //Checks its a chess piece
-        if (clickedObject.TryGetComponent(out Pawn pawn) 
+        if (clickedObject.TryGetComponent(out Pawn pawn)
             && pawn.isWhite == GameModeManager.instance.playerColor)
         {
             selectedPiece = clickedObject;
             pieceHelperScript = pawn.helperClass;
             pawn.ShowLegalMoves();
-            
-            //Checks if the promotion action event has the creation method assigned
-            if (!((PawnHelper) pawn.helperClass).CheckPromotionActions(CreateNewPiece)) ((PawnHelper) pawn.helperClass).promote += CreateNewPiece;
+            if (!((PawnHelper)pawn.helperClass).CheckPromotionActions(CreateNewPiece))
+                ((PawnHelper)pawn.helperClass).promote += CreateNewPiece;
         }
-        else if (clickedObject.TryGetComponent(out Bishop bishop) 
+        else if (clickedObject.TryGetComponent(out Bishop bishop)
             && bishop.isWhite == GameModeManager.instance.playerColor)
         {
             selectedPiece = clickedObject;
@@ -122,13 +182,12 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    //Add sound for every Destroyed piece
     private void DestroyPiece(Piece pieceToRemove) => Destroy(pieceToRemove.associatedGameObject);
 
     private void CreateNewPiece(PieceType type, Vector3 position, bool isWhite)
     {
         string color = isWhite ? "White" : "Black";
-        string pieceName = color + " " + type.ToString();  // ex: "White Bishop"
+        string pieceName = color + " " + type.ToString();
 
         foreach (GameObject model in allPieceModels)
         {
@@ -140,5 +199,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    
+    public bool IsGameOver()
+    {
+        if (SimulationClass.IsCheckMate(KingHelper.FindWhiteKing()))
+        {
+            whoWon = true;
+            return true;
+        }
+        else if (SimulationClass.IsCheckMate(KingHelper.FindBlackKing()))
+        {
+            whoWon = false;
+            return true;
+        }
+        return false;
+    }
+
+    IEnumerator CheckMateSteps()
+    {
+        gameOverText.GetComponent<TMP_Text>().text = "Game Over! \n " + (whoWon ? "White wins!" : "Black wins!");
+        yield return new WaitForSeconds(2f);
+
+        SceneManager.LoadScene("MainMenu");
+    }
 }

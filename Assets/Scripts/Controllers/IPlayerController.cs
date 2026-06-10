@@ -3,5 +3,6 @@ using System;
 public interface IPlayerController
 {
     bool IsHuman { get; }
-    void StartTurn(Action<BoardPos> onMoveReady);
+    // CHANGE: Action now takes a string instead of BoardPos
+    void StartTurn(Action<string> onMoveReady);
 }

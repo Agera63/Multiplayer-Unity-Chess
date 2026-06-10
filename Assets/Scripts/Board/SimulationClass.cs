@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public class SimulationClass
 {
@@ -21,49 +20,41 @@ public class SimulationClass
         SimulationClass sc = new SimulationClass(k);
         Piece simPiece = sc.FindPieceOfPosSim(pieceToMove.position);
 
-        if (simPiece == null)
-        {
-            return false;
-        }
+        if (simPiece == null) return false;
 
         char[] movementCharSim = (pieceToMove.position.PosToString() + "-" + finalPos.PosToString()).ToCharArray();
         sc.UpdateSim(movementCharSim);
 
+        // Return true = move is safe (king no longer in check after this move)
         return !sc.IsKingCheckedSim(sc.KingToMove);
     }
 
     public static bool WillMoveCheckKing(Piece pieceToMove, BoardPos finalPos)
     {
         KingHelper kingToCheck;
-        if (pieceToMove is KingHelper) 
+        if (pieceToMove is KingHelper)
             kingToCheck = (KingHelper)pieceToMove;
         else
             kingToCheck = pieceToMove.isWhite ? KingHelper.FindWhiteKing() : KingHelper.FindBlackKing();
-
 
         if (kingToCheck == null) return false;
 
         SimulationClass sc = new SimulationClass(kingToCheck);
         Piece simPiece = sc.FindPieceOfPosSim(pieceToMove.position);
 
-        if (simPiece == null)
-        {
-            return false;
-        }
+        if (simPiece == null) return false;
 
         char[] movementCharSim = (pieceToMove.position.PosToString() + "-" + finalPos.PosToString()).ToCharArray();
         sc.UpdateSim(movementCharSim);
 
-        //add line to check the bool and the error
-        return !sc.IsKingCheckedSim(sc.KingToMove); 
+        // true = king is safe after this move
+        return !sc.IsKingCheckedSim(sc.KingToMove);
     }
 
     public static bool IsCheckMate(KingHelper k)
     {
         if (!k.IsChecked())
-        {
             return false;
-        }
 
         foreach (Piece p in PieceManager.AllPieces)
         {
@@ -78,9 +69,7 @@ public class SimulationClass
                         if (Piece.CheckPieceMovement(p, targetPos))
                         {
                             if (KingSim(p, targetPos, k))
-                            {
                                 return false;
-                            }
                         }
                     }
                 }
@@ -95,9 +84,7 @@ public class SimulationClass
         foreach (Piece p in GOCopy)
         {
             if (p.position.letter == K.position.letter && p.position.num == K.position.num && p is KingHelper)
-            {
                 return (KingHelper)p;
-            }
         }
         return null;
     }
@@ -122,25 +109,17 @@ public class SimulationClass
                             switch (MovementChar[5])
                             {
                                 case 'n':
-                                    KnightHelper n = new KnightHelper((KnightHelper)((PawnHelper)p).PromotionSimulation(MovementChar[5]));
-                                    temp = false;
-                                    GOCopy.Add(n);
-                                    break;
+                                    GOCopy.Add(new KnightHelper((KnightHelper)((PawnHelper)p).PromotionSimulation(MovementChar[5])));
+                                    temp = false; break;
                                 case 'q':
-                                    QueenHelper q = new QueenHelper((QueenHelper)((PawnHelper)p).PromotionSimulation(MovementChar[5]));
-                                    temp = false;
-                                    GOCopy.Add(q);
-                                    break;
+                                    GOCopy.Add(new QueenHelper((QueenHelper)((PawnHelper)p).PromotionSimulation(MovementChar[5])));
+                                    temp = false; break;
                                 case 'r':
-                                    RookHelper r = new RookHelper((RookHelper)((PawnHelper)p).PromotionSimulation(MovementChar[5]));
-                                    temp = false;
-                                    GOCopy.Add(r);
-                                    break;
+                                    GOCopy.Add(new RookHelper((RookHelper)((PawnHelper)p).PromotionSimulation(MovementChar[5])));
+                                    temp = false; break;
                                 case 'b':
-                                    BishopHelper b = new BishopHelper((BishopHelper)((PawnHelper)p).PromotionSimulation(MovementChar[5]));
-                                    temp = false;
-                                    GOCopy.Add(b);
-                                    break;
+                                    GOCopy.Add(new BishopHelper((BishopHelper)((PawnHelper)p).PromotionSimulation(MovementChar[5])));
+                                    temp = false; break;
                             }
                         } while (temp);
                         p.isActive = false;
@@ -153,9 +132,7 @@ public class SimulationClass
         for (int i = GOCopy.Count - 1; i >= 0; i--)
         {
             if (!GOCopy[i].isActive)
-            {
                 GOCopy.RemoveAt(i);
-            }
         }
     }
 
@@ -163,9 +140,7 @@ public class SimulationClass
     {
         Piece targetPiece = FindPieceOfPosSim(targetPos);
         if (targetPiece != null && targetPiece.isWhite != PieceToMove.isWhite)
-        {
             targetPiece.isActive = false;
-        }
 
         BoardCopy[PieceToMove.position.num, PieceToMove.position.letter] = '\0';
         BoardCopy[targetPos.num, targetPos.letter] = PieceToMove.icon;
@@ -174,7 +149,7 @@ public class SimulationClass
 
     private bool IsKingCheckedSim(KingHelper k)
     {
-        string kingPosStr = k.position.PosToString();
+        BoardPos kingPos = k.position;
 
         for (int number = 0; number < 8; number++)
         {
@@ -184,12 +159,8 @@ public class SimulationClass
 
                 if (attackingPiece != null && attackingPiece.isWhite != k.isWhite)
                 {
-                    BoardPos kingPos = BoardPos.StringToPos(kingPosStr);
-
                     if (CheckPieceMovementSim(attackingPiece, kingPos))
-                    {
                         return true;
-                    }
                 }
             }
         }
@@ -201,9 +172,7 @@ public class SimulationClass
         foreach (Piece p in GOCopy)
         {
             if (position.num == p.position.num && position.letter == p.position.letter)
-            {
                 return p;
-            }
         }
         return null;
     }
@@ -215,16 +184,9 @@ public class SimulationClass
             if (posToMove.num == tempPiece.position.num && posToMove.letter == tempPiece.position.letter)
             {
                 if (condition)
-                {
                     return false;
-                }
-                else
-                {
-                    if (p.isWhite != tempPiece.isWhite)
-                    {
-                        return false;
-                    }
-                }
+                else if (p.isWhite != tempPiece.isWhite)
+                    return false;
             }
         }
         return true;
@@ -235,135 +197,54 @@ public class SimulationClass
         try
         {
             string movementType = BoardPos.CheckMovementDirection(PieceToMove.position, finalPosition);
-            if (movementType != null)
+            if (movementType == null) return false;
+
+            if (movementType.Equals("vertical") && PieceToMove is PawnHelper)
             {
-                if (movementType.Equals("vertical") && PieceToMove is PawnHelper)
+                // Pawns moving forward do NOT threaten the king — only diagonals do.
+                // FIX 5: Old sim treated vertical pawn moves as threats. Removed entirely.
+                return false;
+            }
+            else if (movementType.Equals("diagonal") && PieceToMove is PawnHelper)
+            {
+                if (PieceToMove.isWhite)
                 {
-                    if (PieceToMove.isWhite)
-                    {
-                        if (CheckPosToMoveSim(PieceToMove, finalPosition, true) &&
-                                (BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1 ||
-                                        (BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 2 &&
-                                                PieceToMove.position.num == 1)) &&
-                                finalPosition.num - PieceToMove.position.num > 0)
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        if (CheckPosToMoveSim(PieceToMove, finalPosition, true) &&
-                                (BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1 ||
-                                        (BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 2 &&
-                                                PieceToMove.position.num == 6)) &&
-                                PieceToMove.position.num - finalPosition.num > 0)
-                        {
-                            return true;
-                        }
-                    }
+                    if (BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1
+                        && finalPosition.num - PieceToMove.position.num > 0)
+                        return true;
                 }
-                else if (movementType.Equals("diagonal") && PieceToMove is PawnHelper)
+                else
                 {
-                    if (PieceToMove.isWhite)
-                    {
-                        if (!CheckPosToMoveSim(PieceToMove, finalPosition, false) &&
-                                BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1
-                                && finalPosition.num - PieceToMove.position.num > 0
-                                && FindPieceOfPosSim(finalPosition) != null)
-                        {
-                            if (FindPieceOfPosSim(finalPosition).isWhite != PieceToMove.isWhite)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (!CheckPosToMoveSim(PieceToMove, finalPosition, false) &&
-                                BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1
-                                && PieceToMove.position.num - finalPosition.num > 0
-                                && FindPieceOfPosSim(finalPosition) != null)
-                        {
-                            if (FindPieceOfPosSim(finalPosition).isWhite != PieceToMove.isWhite)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                else if ((movementType.Equals("vertical") || movementType.Equals("horizontal")) &&
-                        PieceToMove is RookHelper)
-                {
-                    if (!CheckPosToMoveSim(PieceToMove, finalPosition, false) &&
-                            !AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
-                    {
+                    if (BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1
+                        && PieceToMove.position.num - finalPosition.num > 0)
                         return true;
-                    }
-                    else if (CheckPosToMoveSim(PieceToMove, finalPosition, true) &&
-                            !AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
-                    {
-                        return true;
-                    }
-                }
-                else if ((movementType.Equals("vertical") || movementType.Equals("horizontal")
-                        || movementType.Equals("diagonal")) && PieceToMove is QueenHelper)
-                {
-                    if (!CheckPosToMoveSim(PieceToMove, finalPosition, false) &&
-                            !AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
-                    {
-                        return true;
-                    }
-                    else if (CheckPosToMoveSim(PieceToMove, finalPosition, true) &&
-                            !AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
-                    {
-                        return true;
-                    }
-                }
-                else if ((movementType.Equals("vertical") || movementType.Equals("horizontal") ||
-                        movementType.Equals("diagonal")) && PieceToMove is KingHelper)
-                {
-                    if (!CheckPosToMoveSim(PieceToMove, finalPosition, false) &&
-                            !AnyPieceBlockingSim(PieceToMove, finalPosition, movementType) &&
-                            BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1)
-                    {
-                        return true;
-                    }
-                    else if (CheckPosToMoveSim(PieceToMove, finalPosition, true) &&
-                            !AnyPieceBlockingSim(PieceToMove, finalPosition, movementType) &&
-                            BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1)
-                    {
-                        return true;
-                    }
-                }
-                else if (movementType.Equals("knight") && PieceToMove is KnightHelper)
-                {
-                    Piece targetPiece = FindPieceOfPosSim(finalPosition);
-                    if (targetPiece != null)
-                    {
-                        if (targetPiece.isWhite != PieceToMove.isWhite)
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-                else if (movementType.Equals("diagonal") && PieceToMove is BishopHelper)
-                {
-                    if (!CheckPosToMoveSim(PieceToMove, finalPosition, false) &&
-                            !AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
-                    {
-                        return true;
-                    }
-                    else if (CheckPosToMoveSim(PieceToMove, finalPosition, true) &&
-                            !AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
-                    {
-                        return true;
-                    }
                 }
             }
+            else if ((movementType.Equals("vertical") || movementType.Equals("horizontal")) && PieceToMove is RookHelper)
+            {
+                if (!AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
+                    return true;
+            }
+            else if ((movementType.Equals("vertical") || movementType.Equals("horizontal") || movementType.Equals("diagonal")) && PieceToMove is QueenHelper)
+            {
+                if (!AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
+                    return true;
+            }
+            else if ((movementType.Equals("vertical") || movementType.Equals("horizontal") || movementType.Equals("diagonal")) && PieceToMove is KingHelper)
+            {
+                if (BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1)
+                    return true;
+            }
+            else if (movementType.Equals("knight") && PieceToMove is KnightHelper)
+            {
+                return true;
+            }
+            else if (movementType.Equals("diagonal") && PieceToMove is BishopHelper)
+            {
+                if (!AnyPieceBlockingSim(PieceToMove, finalPosition, movementType))
+                    return true;
+            }
+
             return false;
         }
         catch
@@ -374,8 +255,7 @@ public class SimulationClass
 
     private bool AnyPieceBlockingSim(Piece pm, BoardPos finalPos, string movementType)
     {
-        Piece pieceToMove = pm;
-        int slotsToCheck = BoardPos.SquaresMoved(movementType, pieceToMove.position, finalPos);
+        int slotsToCheck = BoardPos.SquaresMoved(movementType, pm.position, finalPos);
 
         for (int i = 1; i < slotsToCheck; i++)
         {
@@ -383,68 +263,19 @@ public class SimulationClass
             {
                 if (movementType.Equals("vertical"))
                 {
-                    if (pieceToMove.position.num < finalPos.num)
-                    {
-                        if (BoardCopy[pieceToMove.position.num + i, pieceToMove.position.letter] != '\0')
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        if (BoardCopy[pieceToMove.position.num - i, pieceToMove.position.letter] != '\0')
-                        {
-                            return true;
-                        }
-                    }
+                    int row = pm.position.num < finalPos.num ? pm.position.num + i : pm.position.num - i;
+                    if (BoardCopy[row, pm.position.letter] != '\0') return true;
                 }
                 else if (movementType.Equals("horizontal"))
                 {
-                    if (pieceToMove.position.letter < finalPos.letter)
-                    {
-                        if (BoardCopy[pieceToMove.position.num, pieceToMove.position.letter + i] != '\0')
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        if (BoardCopy[pieceToMove.position.num, pieceToMove.position.letter - i] != '\0')
-                        {
-                            return true;
-                        }
-                    }
+                    int col = pm.position.letter < finalPos.letter ? pm.position.letter + i : pm.position.letter - i;
+                    if (BoardCopy[pm.position.num, col] != '\0') return true;
                 }
                 else if (movementType.Equals("diagonal"))
                 {
-                    if (pieceToMove.position.num < finalPos.num && pieceToMove.position.letter < finalPos.letter)
-                    {
-                        if (BoardCopy[pieceToMove.position.num + i, pieceToMove.position.letter + i] != '\0')
-                        {
-                            return true;
-                        }
-                    }
-                    else if (pieceToMove.position.num > finalPos.num && pieceToMove.position.letter < finalPos.letter)
-                    {
-                        if (BoardCopy[pieceToMove.position.num - i, pieceToMove.position.letter + i] != '\0')
-                        {
-                            return true;
-                        }
-                    }
-                    else if (pieceToMove.position.num < finalPos.num && pieceToMove.position.letter > finalPos.letter)
-                    {
-                        if (BoardCopy[pieceToMove.position.num + i, pieceToMove.position.letter - i] != '\0')
-                        {
-                            return true;
-                        }
-                    }
-                    else if (pieceToMove.position.num > finalPos.num && pieceToMove.position.letter > finalPos.letter)
-                    {
-                        if (BoardCopy[pieceToMove.position.num - i, pieceToMove.position.letter - i] != '\0')
-                        {
-                            return true;
-                        }
-                    }
+                    int row = pm.position.num < finalPos.num ? pm.position.num + i : pm.position.num - i;
+                    int col = pm.position.letter < finalPos.letter ? pm.position.letter + i : pm.position.letter - i;
+                    if (BoardCopy[row, col] != '\0') return true;
                 }
             }
             catch
@@ -458,13 +289,7 @@ public class SimulationClass
     private static char[,] DeepCopyBoard(char[,] original)
     {
         char[,] copy = new char[original.GetLength(0), original.GetLength(1)];
-        for (int i = 0; i < original.GetLength(0); i++)
-        {
-            for (int j = 0; j < original.GetLength(1); j++)
-            {
-                copy[i, j] = original[i, j];
-            }
-        }
+        Array.Copy(original, copy, original.Length);
         return copy;
     }
 
@@ -473,30 +298,14 @@ public class SimulationClass
         List<Piece> tempBoard = new List<Piece>();
         foreach (Piece piece in PieceManager.AllPieces)
         {
-            if (piece is KingHelper)
-            {
-                tempBoard.Add(new KingHelper((KingHelper)piece));
-            }
-            else if (piece is QueenHelper)
-            {
-                tempBoard.Add(new QueenHelper((QueenHelper)piece));
-            }
-            else if (piece is BishopHelper)
-            {
-                tempBoard.Add(new BishopHelper((BishopHelper)piece));
-            }
-            else if (piece is RookHelper)
-            {
-                tempBoard.Add(new RookHelper((RookHelper)piece));
-            }
-            else if (piece is PawnHelper)
-            {
-                tempBoard.Add(new PawnHelper((PawnHelper)piece));
-            }
-            else if (piece is KnightHelper)
-            {
-                tempBoard.Add(new KnightHelper((KnightHelper)piece));
-            }
+            if (!piece.isActive) continue;
+
+            if (piece is KingHelper) tempBoard.Add(new KingHelper((KingHelper)piece));
+            else if (piece is QueenHelper) tempBoard.Add(new QueenHelper((QueenHelper)piece));
+            else if (piece is BishopHelper) tempBoard.Add(new BishopHelper((BishopHelper)piece));
+            else if (piece is RookHelper) tempBoard.Add(new RookHelper((RookHelper)piece));
+            else if (piece is PawnHelper) tempBoard.Add(new PawnHelper((PawnHelper)piece));
+            else if (piece is KnightHelper) tempBoard.Add(new KnightHelper((KnightHelper)piece));
         }
         return tempBoard;
     }

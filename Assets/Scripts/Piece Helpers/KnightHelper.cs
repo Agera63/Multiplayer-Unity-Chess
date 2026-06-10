@@ -4,13 +4,12 @@ using static UnityEditor.PlayerSettings;
 
 public class KnightHelper : Piece
 {
-    public KnightHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition, null) { }
-    public KnightHelper(KnightHelper knight) : base(knight.isWhite, knight.position, knight.associatedGameObject) { }
+    public KnightHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition, null) { icon = _isWhite ? 'N' : 'n'; }
+    public KnightHelper(KnightHelper knight) : base(knight.isWhite, knight.position, knight.associatedGameObject) { icon = knight.isWhite ? 'N' : 'n'; }
     public KnightHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition, _associatedGameObject)
     {
         icon = _isWhite ? 'N' : 'n';
         PieceManager.AllPieces.Add(this);
-
     }
 
     public override void Move(BoardPos _finalBoardPosition)
@@ -23,7 +22,7 @@ public class KnightHelper : Piece
             foreach (Piece p in PieceManager.AllPieces)
             {
                 string PStringPosition = p.position.PosToString();
-                if (_finalBoardPosition.PosToString().Equals(PStringPosition))
+                if (_finalBoardPosition.PosToString().Equals(PStringPosition) && p.isActive)
                 {
                     p.isActive = false;
                     temporaryBoard[this.position.num, this.position.letter] = '\0';

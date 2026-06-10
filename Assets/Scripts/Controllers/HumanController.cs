@@ -1,19 +1,17 @@
 using System;
-using UnityEngine;
 
 public class HumanController : IPlayerController
 {
     public bool IsHuman => true;
-    private Action<BoardPos> onMoveReady;
+    private Action<string> onMoveReady;
 
-    public void StartTurn(Action<BoardPos> onMoveReady)
+    public void StartTurn(Action<string> onMoveReady)
     {
-        throw new NotImplementedException();
+        this.onMoveReady = onMoveReady;
     }
 
-    public void MakeMove(BoardPos position)
+    public void MakeMove(string moveString)
     {
-        // Called by GameManager when player clicks a valid destination
-        onMoveReady?.Invoke(position);
+        onMoveReady?.Invoke(moveString);
     }
 }

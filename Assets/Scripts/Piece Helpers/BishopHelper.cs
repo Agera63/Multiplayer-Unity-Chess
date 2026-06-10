@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class BishopHelper : Piece
 {
-    public BishopHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition, null) { }
-    public BishopHelper(BishopHelper bishop) : base(bishop.isWhite, bishop.position, bishop.associatedGameObject) { }
-    public BishopHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition , _associatedGameObject)
+    public BishopHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition, null) { icon = _isWhite ? 'B' : 'b'; }
+    public BishopHelper(BishopHelper bishop) : base(bishop.isWhite, bishop.position, bishop.associatedGameObject) { icon = bishop.isWhite ? 'B' : 'b'; }
+    public BishopHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition, _associatedGameObject)
     {
         icon = _isWhite ? 'B' : 'b';
         PieceManager.AllPieces.Add(this);
@@ -21,7 +21,7 @@ public class BishopHelper : Piece
             foreach (Piece p in PieceManager.AllPieces)
             {
                 string PStringPosition = p.position.PosToString();
-                if (_finalBoardPosition.PosToString().Equals(PStringPosition))
+                if (_finalBoardPosition.PosToString().Equals(PStringPosition) && p.isActive)
                 {
                     p.isActive = false;
                     temporaryBoard[this.position.num, this.position.letter] = '\0';

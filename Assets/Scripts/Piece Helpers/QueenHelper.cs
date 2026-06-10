@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class QueenHelper : Piece
 {
-    public QueenHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition, null) { }
-    public QueenHelper(QueenHelper queen) : base(queen.isWhite, queen.position, queen.associatedGameObject) { }
+    public QueenHelper(bool _isWhite, BoardPos _boardPosition) : base(_isWhite, _boardPosition, null) { icon = _isWhite ? 'Q' : 'q'; }
+    public QueenHelper(QueenHelper queen) : base(queen.isWhite, queen.position, queen.associatedGameObject) { icon = queen.isWhite ? 'Q' : 'q'; }
     public QueenHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition, _associatedGameObject)
     {
         icon = _isWhite ? 'Q' : 'q';
-        
+
         PieceManager.AllPieces.Add(this);
     }
     public override void Move(BoardPos _finalBoardPosition)
@@ -21,7 +21,7 @@ public class QueenHelper : Piece
             foreach (Piece p in PieceManager.AllPieces)
             {
                 string PStringPosition = p.position.PosToString();
-                if (_finalBoardPosition.PosToString().Equals(PStringPosition))
+                if (_finalBoardPosition.PosToString().Equals(PStringPosition) && p.isActive)
                 {
                     p.isActive = false;
                     temporaryBoard[this.position.num, this.position.letter] = '\0';
