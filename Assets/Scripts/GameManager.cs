@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
 
     private bool whoWon;
 
-    void Awake()
+    void Start()
     {
         //Initalizes the player position
         if (GameModeManager.instance.playerColor) Instantiate(player, new Vector3(0.5f, 5.5f, -2.5f), Quaternion.Euler(new Vector3(45, 0,0)));
