@@ -42,6 +42,24 @@ public class MonoBehaviorPiece : MonoBehaviour
         timer = 0;
     }
 
+    public IEnumerator RejectedMoveAnimation()
+    {
+        float compteur = 1f;
+        while (compteur <= 0f)
+        {
+            transform.position = BoardPos.StringToTileVector3(helperClass.position.PosToString());
+
+            float xPositionOffset = Random.Range(0f, 0.6f);
+            float zPositionOffset = Random.Range(0f, 0.6f);
+
+            transform.position = new Vector3(xPositionOffset + transform.position.x, transform.position.y, zPositionOffset + transform.position.z);
+            compteur -= Time.deltaTime;
+
+            yield return null;
+        }
+        transform.position = BoardPos.StringToTileVector3(helperClass.position.PosToString());
+    }
+
     private void ActivateTrigger()
     {
         trigger.gameObject.SetActive(true);
@@ -50,5 +68,16 @@ public class MonoBehaviorPiece : MonoBehaviour
     private void DeactivateTrigger()
     {
         trigger.gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        //Checks if the destructon is coming from a scene being loaded
+        //or if a capture.
+        if (!gameObject.scene.isLoaded)
+        {
+            PieceManager.AllPieces.Clear();
+            PieceManager.SetBoard(new char[8, 8]);
+        }
     }
 }

@@ -35,11 +35,12 @@ public class PieceManager
             if (p.position.PosToString().Equals(PieceToMove.ToLower()))
             {
                 p.Move(BoardPos.StringToPos(PositionToMove.ToLower()));
-                if (MovementChar.Length == 6 && p is PawnHelper)
+                if (MovementChar.Length == 6 && MovementChar[5] != '\0' && p is PawnHelper)
                 {
                     if ((p.position.num == 0 && !GameModeManager.instance.playerColor) || (p.position.num == 7 && GameModeManager.instance.playerColor))
                     {
                         ((PawnHelper)p).Promotion(MovementChar[5]);
+                        p.isActive = false;
                     }
                 }
                 break;

@@ -1,6 +1,6 @@
 public class Queen : MonoBehaviorPiece
 {
-   void Start()
+    void Awake()
     {
         helperClass = new QueenHelper(
             isWhite,

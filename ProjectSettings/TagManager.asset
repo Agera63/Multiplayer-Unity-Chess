@@ -12,6 +12,7 @@ TagManager:
   - Queen
   - Rook
   - Board
+  - PromotionMenuUI
   layers:
   - Default
   - TransparentFX

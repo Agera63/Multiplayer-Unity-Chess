@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class King : MonoBehaviorPiece
 {
-    void Start()
+    void Awake()
     {
         helperClass = new KingHelper(
             isWhite,

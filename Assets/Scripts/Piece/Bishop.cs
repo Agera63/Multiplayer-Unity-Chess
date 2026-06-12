@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Bishop : MonoBehaviorPiece
 {
-    void Start()
+    void Awake()
     {
         helperClass = new BishopHelper(
             isWhite,

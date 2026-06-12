@@ -1,6 +1,6 @@
 public class Rook : MonoBehaviorPiece
 {    
-    void Start()
+    void Awake()
     {
         helperClass = new RookHelper(
             isWhite,

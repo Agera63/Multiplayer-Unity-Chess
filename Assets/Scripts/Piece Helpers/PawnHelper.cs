@@ -6,7 +6,7 @@ using static UnityEditor.PlayerSettings;
 public class PawnHelper : Piece
 {
     public bool canMove2Squares;
-    public event Action<PieceType, Vector3, bool> promote;
+    public event Action<PieceType, Vector3, Piece> promote;
 
     public PawnHelper(PawnHelper pawn) : base(pawn.isWhite, pawn.position, pawn.associatedGameObject) { icon = pawn.isWhite ? 'P' : 'p'; }
     public PawnHelper(bool _isWhite, BoardPos _boardPosition, GameObject _associatedGameObject) : base(_isWhite, _boardPosition, _associatedGameObject)
@@ -55,9 +55,8 @@ public class PawnHelper : Piece
         else if (pieceToPromote.ToString().ToLower().Equals("n")) promotionSelection = PieceType.Knight;
         else if (pieceToPromote.ToString().ToLower().Equals("r")) promotionSelection = PieceType.Rook;
         else if (pieceToPromote.ToString().ToLower().Equals("b")) promotionSelection = PieceType.Bishop;
-        promote?.Invoke(promotionSelection,
-            BoardPos.StringToTileVector3(position.PosToString()),
-            isWhite);
+
+        promote?.Invoke(promotionSelection, BoardPos.StringToTileVector3(position.PosToString()), this);
     }
 
     public Piece PromotionSimulation(char pieceToPromote)
@@ -72,5 +71,5 @@ public class PawnHelper : Piece
         }
     }
 
-    public bool CheckPromotionActions(Action<PieceType, Vector3, bool> creationMethod) { return promote?.GetInvocationList().Contains(creationMethod) ?? false; }
+    public bool CheckPromotionActions(Action<PieceType, Vector3, Piece> creationMethod) { return promote?.GetInvocationList().Contains(creationMethod) ?? false; }
 }

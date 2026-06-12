@@ -36,15 +36,9 @@ public abstract class Piece
         try
         {
             // CHANGE: check against whose turn it is, not player color
-            if (PieceToMove == null || PieceToMove.isWhite != isWhiteTurn)
-            {
-                return false;
-            }
+            if (PieceToMove == null || PieceToMove.isWhite != isWhiteTurn) return false;
 
-            bool movementValid = CheckPieceMovement(PieceToMove, finalPosition);
-
-            bool result = IsValidMoveWithCheckValidation(PieceToMove, finalPosition);
-            return result;
+            return IsValidMoveWithCheckValidation(PieceToMove, finalPosition);
         }
         catch (Exception e)
         {

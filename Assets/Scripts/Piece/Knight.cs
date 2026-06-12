@@ -1,6 +1,6 @@
 public class Knight : MonoBehaviorPiece
 {
-    void Start()
+    void Awake()
     {
         helperClass = new KnightHelper(
                 isWhite,
