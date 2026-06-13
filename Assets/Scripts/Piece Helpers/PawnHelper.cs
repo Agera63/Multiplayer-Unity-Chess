@@ -5,6 +5,7 @@ using UnityEngine;
 public class PawnHelper : Piece
 {
     public bool canMove2Squares;
+    public bool canBeEnPassant;
     public event Action<PieceType, Vector3, Piece> promote;
 
     public PawnHelper(PawnHelper pawn) : base(pawn.isWhite, pawn.position, pawn.associatedGameObject) { icon = pawn.isWhite ? 'P' : 'p'; }

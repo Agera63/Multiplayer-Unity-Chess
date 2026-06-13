@@ -80,22 +80,29 @@ public class GameManager : MonoBehaviour
 
     private void TryMovePiece(string moveString)
     {
-        mouvementChar = new char[5];
         mouvementChar = moveString.ToCharArray();
 
-        //Checks if moving piece is a pawn to add the type of piece it wants to promote in the mouvement char
         Piece movingPiece = Piece.FindPieceAtPos(BoardPos.StringToPos(moveString.Split('-')[0]));
-        
-        //Handles the pawn promotion move
-        if (movingPiece is PawnHelper 
-            && movingPiece.associatedGameObject.TryGetComponent(out Pawn p) 
+
+        if (movingPiece is PawnHelper pawnHelper
+            && movingPiece.associatedGameObject.TryGetComponent(out Pawn p)
             && p.isGoignToPromoting)
         {
-            StartCoroutine(HandlePromotion(mouvementChar, p)); 
-            return;
+            if (currentController.IsHuman)
+            {
+                StartCoroutine(HandlePromotion(mouvementChar, p));
+                return;
+            }
+            else
+            {
+                // Hook up PawnPromotion for Stockfish the same way as human
+                if (!pawnHelper.CheckPromotionActions(PawnPromotion))
+                    pawnHelper.promote += PawnPromotion;
+                ExecuteMove();
+                return;
+            }
         }
 
-        //Handles other mouvements that are not promotions
         ExecuteMove();
     }
 
@@ -221,12 +228,12 @@ public class GameManager : MonoBehaviour
     {
         if (SimulationClass.IsCheckMate(KingHelper.FindWhiteKing()))
         {
-            whoWon = true;
+            whoWon = false;
             return true;
         }
         else if (SimulationClass.IsCheckMate(KingHelper.FindBlackKing()))
         {
-            whoWon = false;
+            whoWon = true;
             return true;
         }
         return false;
@@ -242,13 +249,16 @@ public class GameManager : MonoBehaviour
 
     IEnumerator HandlePromotion(char[] mouvementChar, Pawn p)
     {
-        promotionSelectionMade = false;
-        p.promotionResult += SelectedPromotionPiece;
-        p.PromotePawn();
+        if (currentController.IsHuman)
+        {
+            promotionSelectionMade = false;
+            p.promotionResult += SelectedPromotionPiece;
+            p.PromotePawn();
 
-        //waits until a piece has been selected to move
-        while (!promotionSelectionMade)
-            yield return new WaitForSecondsRealtime(0.05f);
+            //waits until a piece has been selected to move
+            while (!promotionSelectionMade)
+                yield return new WaitForSecondsRealtime(0.05f);
+        }
 
         ExecuteMove();
     }

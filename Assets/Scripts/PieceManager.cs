@@ -37,7 +37,7 @@ public class PieceManager
                 p.Move(BoardPos.StringToPos(PositionToMove.ToLower()));
                 if (MovementChar.Length == 6 && MovementChar[5] != '\0' && p is PawnHelper)
                 {
-                    if ((p.position.num == 0 && !GameModeManager.instance.playerColor) || (p.position.num == 7 && GameModeManager.instance.playerColor))
+                    if ((p.position.num == 0 && !p.isWhite) || (p.position.num == 7 && p.isWhite))
                     {
                         ((PawnHelper)p).Promotion(MovementChar[5]);
                         p.isActive = false;
@@ -46,19 +46,10 @@ public class PieceManager
                 break;
             }
         }
-        // checks for deactivated pieces
-        foreach (Piece p in AllPieces)
-        {
-            if (!p.isActive)
-            {
-                removeGameObj?.Invoke(p);
-                AllPieces.Remove(p);
-                /*DO NOT REMOVE BREAK!!!
-                If you remove the break, the list would have been altered and then it will throw an error */
-                break;
-            }
-        }
+        //Removes inactive pieces
+        RemoveInactivePieces();
 
+        //sets the board so it can be used
         InitializeBoard();
     }
 
@@ -82,6 +73,22 @@ public class PieceManager
             {
                 Board[p.position.num, p.position.letter] = p.icon;
             }
+        }
+    }
+
+    private static void RemoveInactivePieces()
+    {
+        List<Piece> toRemove = new List<Piece>();
+        foreach (Piece p in AllPieces)
+        {
+            if (!p.isActive)
+                toRemove.Add(p);
+        }
+
+        foreach (Piece p in toRemove)
+        {
+            AllPieces.Remove(p);
+            removeGameObj?.Invoke(p);
         }
     }
 }

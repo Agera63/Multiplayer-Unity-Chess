@@ -141,6 +141,25 @@ public class SimulationClass
         if (targetPiece != null && targetPiece.isWhite != PieceToMove.isWhite)
             targetPiece.isActive = false;
 
+        // Handle en passant capture in simulation
+        if (PieceToMove is PawnHelper)
+        {
+            int direction = PieceToMove.isWhite ? -1 : 1;
+            bool isDiagonal = PieceToMove.position.letter != targetPos.letter;
+            bool isEmptySquare = targetPiece == null;
+
+            if (isDiagonal && isEmptySquare)
+            {
+                // The captured pawn sits beside the moving pawn, not on the destination
+                Piece enPassantPawn = FindPieceOfPosSim(new BoardPos(targetPos.num + direction, targetPos.letter));
+                if (enPassantPawn != null && enPassantPawn is PawnHelper && enPassantPawn.isWhite != PieceToMove.isWhite)
+                {
+                    enPassantPawn.isActive = false;
+                    BoardCopy[enPassantPawn.position.num, enPassantPawn.position.letter] = '\0';
+                }
+            }
+        }
+
         BoardCopy[PieceToMove.position.num, PieceToMove.position.letter] = '\0';
         BoardCopy[targetPos.num, targetPos.letter] = PieceToMove.icon;
         PieceToMove.position = targetPos;

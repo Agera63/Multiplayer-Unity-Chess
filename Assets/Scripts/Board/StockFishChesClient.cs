@@ -86,8 +86,11 @@ namespace ChessClient
         {
             if (move != null && move.Length >= 4)
             {
-                Console.WriteLine("Stockfish plays " + move.Substring(0, 2) + " to " + move.Substring(2, 2) + ".");
-                return move.Substring(0, 2) + "-" + move.Substring(2, 2);
+                string formatted = move.Substring(0, 2) + "-" + move.Substring(2, 2);
+                if (move.Length == 5)
+                    formatted += move[4];
+                UnityEngine.Debug.Log(formatted);
+                return formatted;
             }
             return "No move found";
         }

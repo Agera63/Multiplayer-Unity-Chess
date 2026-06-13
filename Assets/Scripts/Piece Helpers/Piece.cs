@@ -368,20 +368,25 @@ public abstract class Piece
                                 return true;
                             }
                         }
+                        // White en passant
                         else if (PieceToMove.CheckPosToMove(PieceToMove, finalPosition, true) &&
                                 BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1
                                 && finalPosition.num - PieceToMove.position.num > 0
                                 && FindPieceAtPos(finalPosition) == null)
                         {
                             Piece temppiece = FindPieceAtPos(new BoardPos(finalPosition.num - 1, finalPosition.letter));
-                            if (temppiece != null)
+                            if (temppiece != null
+                                && temppiece.isWhite != PieceToMove.isWhite
+                                && temppiece is PawnHelper
+                                && ((PawnHelper)temppiece).canMove2Squares
+                                && temppiece.position.num == 4)
                             {
-                                if (temppiece.isWhite != PieceToMove.isWhite && temppiece is PawnHelper &&
-                                    ((PawnHelper)temppiece).canMove2Squares && temppiece.position.num == 4)
-                                {
-                                    ((PawnHelper)temppiece).canMove2Squares = false;
-                                    return true;
-                                }
+                                ((PawnHelper)temppiece).canMove2Squares = false;
+                                ((PawnHelper)temppiece).canBeEnPassant = false;
+                                temppiece.isActive = false; // actually capture the pawn
+                                ((PawnHelper)PieceToMove).canMove2Squares = false;
+                                ((PawnHelper)PieceToMove).canBeEnPassant = false;
+                                return true;
                             }
                         }
                     }
@@ -398,16 +403,24 @@ public abstract class Piece
                                 return true;
                             }
                         }
+                        // Black en passant
                         else if (!PieceToMove.CheckPosToMove(PieceToMove, finalPosition, true) &&
                                 BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1
                                 && PieceToMove.position.num - finalPosition.num > 0
                                 && FindPieceAtPos(finalPosition) == null)
                         {
-                            Piece temppiece = FindPieceAtPos(new BoardPos(finalPosition.num - 1, finalPosition.letter));
-                            if (temppiece.isWhite != PieceToMove.isWhite && temppiece is PawnHelper &&
-                                    ((PawnHelper)temppiece).canMove2Squares && temppiece.position.num == 3)
+                            Piece temppiece = FindPieceAtPos(new BoardPos(finalPosition.num + 1, finalPosition.letter)); // +1 for black
+                            if (temppiece != null
+                                && temppiece.isWhite != PieceToMove.isWhite
+                                && temppiece is PawnHelper
+                                && ((PawnHelper)temppiece).canMove2Squares
+                                && temppiece.position.num == 3)
                             {
                                 ((PawnHelper)temppiece).canMove2Squares = false;
+                                ((PawnHelper)temppiece).canBeEnPassant = false;
+                                temppiece.isActive = false; // actually capture the pawn
+                                ((PawnHelper)PieceToMove).canMove2Squares = false;
+                                ((PawnHelper)PieceToMove).canBeEnPassant = false;
                                 return true;
                             }
                         }
@@ -452,40 +465,38 @@ public abstract class Piece
 
                         KingHelper king = (KingHelper)PieceToMove;
 
-                        // CRITICAL: Cannot castle if king is in check
                         if (king.IsChecked()) return false;
 
                         RookHelper r = (RookHelper)FindPieceAtPos(BoardPos.StringToPos(castlingMap[strFinalPos]));
 
                         if (PieceManager.CanCastle(r, king))
                         {
-                            // Check if path is clear AND king doesn't pass through check
                             if (strFinalPos.Equals("g1") &&
                                     !PieceToMove.AnyPieceBlocking(BoardPos.StringToPos("g1"), movementType) &&
-                                    !IsSquareUnderAttack(new BoardPos(0, 5), king.isWhite) && // f1
+                                    !IsSquareUnderAttack(new BoardPos(0, 5), king.isWhite) &&
                                     !IsSquareUnderAttack(new BoardPos(0, 6), king.isWhite))
-                            {  // g1
+                            {
                                 return true;
                             }
                             else if (strFinalPos.Equals("c1") &&
                                     !PieceToMove.AnyPieceBlocking(BoardPos.StringToPos("b1"), movementType) &&
-                                    !IsSquareUnderAttack(new BoardPos(0, 3), king.isWhite) && // d1
+                                    !IsSquareUnderAttack(new BoardPos(0, 3), king.isWhite) &&
                                     !IsSquareUnderAttack(new BoardPos(0, 2), king.isWhite))
-                            {  // c1
+                            {
                                 return true;
                             }
                             else if (strFinalPos.Equals("g8") &&
                                     !PieceToMove.AnyPieceBlocking(BoardPos.StringToPos("g8"), movementType) &&
-                                    !IsSquareUnderAttack(new BoardPos(7, 5), king.isWhite) && // f8
+                                    !IsSquareUnderAttack(new BoardPos(7, 5), king.isWhite) &&
                                     !IsSquareUnderAttack(new BoardPos(7, 6), king.isWhite))
-                            {  // g8
+                            {
                                 return true;
                             }
                             else if (strFinalPos.Equals("c8") &&
                                     !PieceToMove.AnyPieceBlocking(BoardPos.StringToPos("b8"), movementType) &&
-                                    !IsSquareUnderAttack(new BoardPos(7, 3), king.isWhite) && // d8
+                                    !IsSquareUnderAttack(new BoardPos(7, 3), king.isWhite) &&
                                     !IsSquareUnderAttack(new BoardPos(7, 2), king.isWhite))
-                            {  // c8
+                            {
                                 return true;
                             }
                         }
