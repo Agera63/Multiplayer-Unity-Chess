@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,5 +15,14 @@ public class GameMenuController : MonoBehaviour
 
     public void RookPromotion() => sendPromotionValue?.Invoke('r');
 
-    public void ExitGame() => SceneManager.LoadScene("MainMenu");
+    public void ExitGame()
+    {
+        if (NetworkManager.Singleton != null &&
+            (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsClient))
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+
+        SceneManager.LoadScene("MainMenu");
+    }
 }

@@ -21,8 +21,11 @@ public class RelayManager : MonoBehaviour
 
     private async void Start()
     {
-        await UnityServices.InitializeAsync();
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        if (UnityServices.State != ServicesInitializationState.Initialized)
+        {
+            await UnityServices.InitializeAsync();
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        }
 
         hostBtn.onClick.AddListener(CreateRelay);
         joinBtn.onClick.AddListener(JoinRelay);
@@ -31,6 +34,12 @@ public class RelayManager : MonoBehaviour
 
     private async void CreateRelay()
     {
+        if (NetworkManager.Singleton.IsListening)
+        {
+            NetworkManager.Singleton.Shutdown();
+            await Task.Delay(500);
+        }
+
         try
         {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);

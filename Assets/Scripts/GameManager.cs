@@ -35,6 +35,8 @@ public class GameManager : MonoBehaviour
             && NetworkManager.Singleton != null
             && !NetworkManager.Singleton.IsHost;
 
+        NetworkGameManager.OnOpponentDisconnected += HandleOpponentDisconnected;
+
         if (!isOnlineClient)
         {
             AssignControllers();
@@ -302,5 +304,25 @@ public class GameManager : MonoBehaviour
                 break;
             }
         }
+    }
+
+    private void HandleOpponentDisconnected()
+    {
+        NetworkGameManager.OnOpponentDisconnected -= HandleOpponentDisconnected;
+        whoWon = GameModeManager.instance.playerColor;
+
+        if (NetworkManager.Singleton != null &&
+            (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsClient))
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+
+        StartCoroutine(CheckMateSteps());
+    }
+
+    private void OnDestroy()
+    {
+        NetworkGameManager.OnOpponentDisconnected -= HandleOpponentDisconnected;
+        PieceManager.removeGameObj -= DestroyPiece;
     }
 }

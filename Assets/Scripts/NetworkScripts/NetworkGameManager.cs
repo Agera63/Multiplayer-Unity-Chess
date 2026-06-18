@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -5,8 +6,11 @@ public class NetworkGameManager : NetworkBehaviour
 {
     public static NetworkGameManager Instance;
     public static bool IsClientWaitingForColor = false;
-
+    
     public NetworkController networkController;
+
+    public static event Action OnOpponentDisconnected;
+
 
     private void Awake()
     {
@@ -51,5 +55,23 @@ public class NetworkGameManager : NetworkBehaviour
         GameObject.FindGameObjectsWithTag("GameManager")[0]
             ?.GetComponent<GameManager>()
             ?.InitializeOnlineGame();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnPlayerDisconnected;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        NetworkManager.Singleton.OnClientDisconnectCallback -= OnPlayerDisconnected;
+        IsClientWaitingForColor = false;
+        OnOpponentDisconnected = null;
+    }
+
+    private void OnPlayerDisconnected(ulong clientId)
+    {
+        if (clientId != NetworkManager.Singleton.LocalClientId)
+            OnOpponentDisconnected?.Invoke();
     }
 }
