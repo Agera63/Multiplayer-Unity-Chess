@@ -31,10 +31,11 @@ public class GameManager : MonoBehaviour
         PieceManager.InitializeBoard();
         PieceManager.removeGameObj += DestroyPiece;
 
-        // Host and offline modes can start immediately
-        // Client must wait for color assignment via RPC
-        if (GameModeManager.instance.selectedMode != GameMode.PvP_Online
-            || (NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost))
+        bool isOnlineClient = GameModeManager.instance.selectedMode == GameMode.PvP_Online
+            && NetworkManager.Singleton != null
+            && !NetworkManager.Singleton.IsHost;
+
+        if (!isOnlineClient)
         {
             AssignControllers();
             StartTurn();

@@ -45,9 +45,11 @@ public class NetworkGameManager : NetworkBehaviour
         IsClientWaitingForColor = false;
         GameModeManager.instance.SetPlayerColor(clientIsWhite);
 
-        CameraScript.LocalInstance?.PositionCamera();
+        if (CameraScript.LocalInstance != null)
+            CameraScript.LocalInstance.PositionCamera();
 
-        // Now that color is known, initialize the game controllers on the client
-        GameObject.FindGameObjectsWithTag("GameManager")[0]?.GetComponent<GameManager>()?.InitializeOnlineGame();
+        GameObject.FindGameObjectsWithTag("GameManager")[0]
+            ?.GetComponent<GameManager>()
+            ?.InitializeOnlineGame();
     }
 }
