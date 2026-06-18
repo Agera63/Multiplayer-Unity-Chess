@@ -1434,6 +1434,7 @@ MonoBehaviour:
   backBtn: {fileID: 542565888}
   codeInput: {fileID: 664888590}
   codeText: {fileID: 682399442}
+  joinSection: {fileID: 492284637}
 --- !u!114 &600791233
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3248,6 +3249,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuController
   botColorPick: {fileID: 1304363186}
   onlineCode: {fileID: 119124711}
+  joinSection: {fileID: 492284637}
 --- !u!4 &1363270921
 Transform:
   m_ObjectHideFlags: 0

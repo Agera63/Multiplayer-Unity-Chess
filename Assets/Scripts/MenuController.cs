@@ -7,6 +7,7 @@ public class MenuController : MonoBehaviour
 {
     [SerializeField] private GameObject botColorPick;
     [SerializeField] private GameObject onlineCode;
+    [SerializeField] private GameObject joinSection;
 
     public void BotHanlder()
     {
@@ -56,6 +57,7 @@ public class MenuController : MonoBehaviour
     //For Join Code menu
     public void CloseJoiningMenu()
     {
-        onlineCode.gameObject.SetActive(false);
+        joinSection.SetActive(true);
+        onlineCode.SetActive(false);
     }
 }

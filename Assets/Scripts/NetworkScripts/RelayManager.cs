@@ -18,6 +18,7 @@ public class RelayManager : MonoBehaviour
     [SerializeField] private Button backBtn;
     [SerializeField] private TMP_InputField codeInput;
     [SerializeField] private TMP_Text codeText;
+    [SerializeField] private GameObject joinSection;
 
     private async void Start()
     {
@@ -44,6 +45,7 @@ public class RelayManager : MonoBehaviour
         {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            joinSection.SetActive(false);
             codeText.text = "Code : " + joinCode;
 
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetHostRelayData(
@@ -120,6 +122,7 @@ public class RelayManager : MonoBehaviour
         if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsClient)
         {
             NetworkManager.Singleton.Shutdown();
+            joinSection.SetActive(true);
             codeText.text = "";
         }
     }
