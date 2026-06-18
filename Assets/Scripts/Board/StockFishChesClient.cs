@@ -89,7 +89,6 @@ namespace ChessClient
                 string formatted = move.Substring(0, 2) + "-" + move.Substring(2, 2);
                 if (move.Length == 5)
                     formatted += move[4];
-                UnityEngine.Debug.Log(formatted);
                 return formatted;
             }
             return "No move found";

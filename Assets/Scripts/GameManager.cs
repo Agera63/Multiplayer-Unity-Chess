@@ -1,5 +1,6 @@
 using System.Collections;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -9,7 +10,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject[] allPieceModels;
     [SerializeField] GameObject player;
     [SerializeField] GameObject gameOverText;
-        
+
     private bool colorTurn;
     private GameObject selectedPiece;
     private Piece pieceHelperScript;
@@ -24,25 +25,24 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        //Initalizes the player position
-        if (GameModeManager.instance.playerColor) Instantiate(player, new Vector3(0.5f, 5.5f, -2.5f), Quaternion.Euler(new Vector3(45, 0,0)));
-        else Instantiate(player, new Vector3(0.5f, 5.5f, 10f), Quaternion.Euler(new Vector3(45, 180, 0)));
-
         colorTurn = true;
         selectedPiece = null;
 
         PieceManager.InitializeBoard();
         PieceManager.removeGameObj += DestroyPiece;
 
-        AssignControllers();
-
-        StartTurn();
+        // Host and offline modes can start immediately
+        // Client must wait for color assignment via RPC
+        if (GameModeManager.instance.selectedMode != GameMode.PvP_Online
+            || (NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost))
+        {
+            AssignControllers();
+            StartTurn();
+        }
     }
 
     void Update()
     {
-        //BUG: when a promtoion is being made, another click is registered and the finalposition of the pawn move is wrong
-        //FIX: when the game is paused, it only comes from promotion menu being active. So, no clicks are registered
         if (Time.timeScale == 0f) return;
 
         if (currentController != null && currentController.IsHuman)
@@ -78,9 +78,22 @@ public class GameManager : MonoBehaviour
         currentController.StartTurn((moveString) => TryMovePiece(moveString));
     }
 
+    public void InitializeOnlineGame()
+    {
+        AssignControllers();
+        StartTurn();
+    }
+
     private void TryMovePiece(string moveString)
     {
         mouvementChar = moveString.ToCharArray();
+
+        // Send the move to the opponent if we're online and this was our turn
+        if (GameModeManager.instance.selectedMode == GameMode.PvP_Online
+            && currentController is HumanController)
+        {
+            NetworkGameManager.Instance.SendMove(moveString);
+        }
 
         Piece movingPiece = Piece.FindPieceAtPos(BoardPos.StringToPos(moveString.Split('-')[0]));
 
@@ -95,7 +108,6 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // Hook up PawnPromotion for Stockfish the same way as human
                 if (!pawnHelper.CheckPromotionActions(PawnPromotion))
                     pawnHelper.promote += PawnPromotion;
                 ExecuteMove();
@@ -108,21 +120,17 @@ public class GameManager : MonoBehaviour
 
     private void ExecuteMove()
     {
-        //Sees if the move is valid before executing it
         if (Piece.IsValidMove(mouvementChar, colorTurn))
         {
-            //Updates the board 
             PieceManager.Update(mouvementChar);
             colorTurn = !colorTurn;
 
             selectedPiece = null;
             pieceHelperScript = null;
 
-            //Checks if game is over
             if (IsGameOver())
                 StartCoroutine(CheckMateSteps());
 
-            //Starts the next turn after every successful move
             StartTurn();
         }
     }
@@ -147,14 +155,20 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GameMode.PvP_Online:
+                var netController = new NetworkController();
+
+                // Give NetworkGameManager a reference so RPCs can call ReceiveMove()
+                if (NetworkGameManager.Instance != null)
+                    NetworkGameManager.Instance.networkController = netController;
+
                 if (playerIsWhite)
                 {
                     whiteController = new HumanController();
-                    blackController = new NetworkController();
+                    blackController = netController;
                 }
                 else
                 {
-                    whiteController = new NetworkController();
+                    whiteController = netController;
                     blackController = new HumanController();
                 }
                 break;
@@ -218,8 +232,6 @@ public class GameManager : MonoBehaviour
 
     private void PawnPromotion(PieceType type, Vector3 position, Piece pawn)
     {
-        //Because all the pieces are instantiated with a 0.05f y, the code will fail if 
-        //that 0.05f is not added to all pieces.
         CreateNewPiece(type, position + new Vector3(0, 0.05f, 0), pawn);
         DestroyPiece(pawn);
     }
@@ -243,7 +255,6 @@ public class GameManager : MonoBehaviour
     {
         gameOverText.GetComponent<TMP_Text>().text = "Game Over! \n " + (whoWon ? "White wins!" : "Black wins!");
         yield return new WaitForSeconds(2f);
-
         SceneManager.LoadScene("MainMenu");
     }
 
@@ -255,7 +266,6 @@ public class GameManager : MonoBehaviour
             p.promotionResult += SelectedPromotionPiece;
             p.PromotePawn();
 
-            //waits until a piece has been selected to move
             while (!promotionSelectionMade)
                 yield return new WaitForSecondsRealtime(0.05f);
         }
@@ -263,13 +273,14 @@ public class GameManager : MonoBehaviour
         ExecuteMove();
     }
 
-    private void SelectedPromotionPiece(char selection) 
+    private void SelectedPromotionPiece(char selection)
     {
         if (mouvementChar.Length != 6)
         {
             mouvementChar = (new string(mouvementChar) + selection).ToCharArray();
             promotionSelectionMade = true;
-        } else if(mouvementChar.Length == 6)
+        }
+        else if (mouvementChar.Length == 6)
         {
             mouvementChar[5] = selection;
         }
@@ -291,5 +302,4 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
 }

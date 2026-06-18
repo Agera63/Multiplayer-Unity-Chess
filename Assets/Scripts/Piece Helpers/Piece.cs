@@ -42,6 +42,7 @@ public abstract class Piece
         }
         catch (Exception e)
         {
+            Debug.Log(e);
             return false;
         }
     }

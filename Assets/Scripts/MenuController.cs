@@ -7,10 +7,6 @@ public class MenuController : MonoBehaviour
 {
     [SerializeField] private GameObject botColorPick;
     [SerializeField] private GameObject onlineCode;
-    [SerializeField] private GameObject settingsMenu;
-
-    [SerializeField] private GameObject codeInput;
-    [SerializeField] private GameObject matchmakingError;
 
     public void BotHanlder()
     {
@@ -58,17 +54,6 @@ public class MenuController : MonoBehaviour
     }
 
     //For Join Code menu
-    public void VerifyJoinCode()
-    {
-        if(codeInput is null && codeInput.GetComponent<TextMeshPro>().Equals(""))
-        {
-            matchmakingError.GetComponent<TextMeshPro>().text = "Lobby not found";
-        } else
-        {
-            //Code to switch scene and load game
-        }
-    }
-
     public void CloseJoiningMenu()
     {
         onlineCode.gameObject.SetActive(false);
