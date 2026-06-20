@@ -456,7 +456,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -326.0951, y: 204.5}
+  m_AnchoredPosition: {x: -326.0951, y: 224.6}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &238977341
@@ -3436,8 +3436,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -403.5951, y: 228.5}
-  m_SizeDelta: {x: 456.7, y: 50}
+  m_AnchoredPosition: {x: -397.3, y: 238.8}
+  m_SizeDelta: {x: 524, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1498875011
 MonoBehaviour:
@@ -3459,7 +3459,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Pay to Win Chess
+  m_text: Chess
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b90ed3ab3bd9bdf459c93bdaf917f2db, type: 2}
   m_sharedMaterial: {fileID: 3860673707996369335, guid: b90ed3ab3bd9bdf459c93bdaf917f2db, type: 2}
@@ -3486,8 +3486,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 83.2
-  m_fontSizeBase: 83.2
+  m_fontSize: 154.3
+  m_fontSizeBase: 154.3
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
