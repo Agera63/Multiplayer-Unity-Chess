@@ -123,9 +123,29 @@ public class GameManager : MonoBehaviour
 
     private void ExecuteMove()
     {
+        foreach (Piece p in PieceManager.AllPieces)
+        {
+            if (p is PawnHelper ph && ph.canMove2Squares)
+                Debug.Log($"[EXEC DEBUG] Before IsValidMove: {p.position.PosToString()} canMove2Squares=True");
+        }
+
         if (Piece.IsValidMove(mouvementChar, colorTurn))
         {
+            Debug.Log($"[EXEC DEBUG] IsValidMove returned true, calling PieceManager.Update");
             PieceManager.Update(mouvementChar);
+
+            // En passant is only legal on the turn immediately after the double-step.
+            // The mover (colorTurn) just took their move, so the opponent's window
+            // to capture en passant has now closed — clear their pawns' flags.
+            // The mover's own pawn (if it just double-stepped) is untouched here,
+            // since its flag was only just set and is meant to last through the
+            // opponent's upcoming turn.
+            foreach (Piece p in PieceManager.AllPieces)
+            {
+                if (p is PawnHelper ph && ph.isWhite != colorTurn)
+                    ph.canMove2Squares = false;
+            }
+
             colorTurn = !colorTurn;
 
             selectedPiece = null;
@@ -135,6 +155,10 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(CheckMateSteps());
 
             StartTurn();
+        }
+        else
+        {
+            Debug.Log($"[EXEC DEBUG] IsValidMove returned FALSE — move rejected");
         }
     }
 

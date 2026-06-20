@@ -20,14 +20,17 @@ public class PawnHelper : Piece
         string movementType = BoardPos.CheckMovementDirection(this.position, _finalBoardPosition);
         char[,] temporaryBoard = PieceManager.GetBoard();
 
+        Debug.Log($"[MOVE DEBUG] PawnHelper.Move() called: {this.position.PosToString()} -> {_finalBoardPosition.PosToString()}, movementType={movementType}, isWhite={this.isWhite}");
+
         if (!this.CheckPosToMove(this, _finalBoardPosition, true) && movementType.Equals("diagonal"))
         {
-            // if we are in this condition, it means that there is a piece of the opposite color that will be removed.
+            Debug.Log($"[MOVE DEBUG] Taking diagonal branch (enemy piece at destination)");
             foreach (Piece p in PieceManager.AllPieces)
             {
                 string PStringPosition = p.position.PosToString();
                 if (_finalBoardPosition.PosToString().Equals(PStringPosition) && p.isActive)
                 {
+                    Debug.Log($"[MOVE DEBUG] Capturing piece at {PStringPosition}");
                     p.isActive = false;
                     temporaryBoard[this.position.num, this.position.letter] = '\0';
                     temporaryBoard[_finalBoardPosition.num, _finalBoardPosition.letter] = this.icon;
@@ -38,11 +41,26 @@ public class PawnHelper : Piece
         }
         else
         {
+            // Check if this is an en passant capture
+            if (movementType.Equals("diagonal"))
+            {
+                int capturedPawnRow = this.isWhite ? _finalBoardPosition.num - 1 : _finalBoardPosition.num + 1;
+                Piece capturedPawn = FindPieceAtPos(new BoardPos(capturedPawnRow, _finalBoardPosition.letter));
+                if (capturedPawn != null && capturedPawn is PawnHelper && capturedPawn.isWhite != this.isWhite)
+                {
+                    capturedPawn.isActive = false;
+                    temporaryBoard[capturedPawn.position.num, capturedPawn.position.letter] = '\0';
+                }
+            }
+
             temporaryBoard[this.position.num, this.position.letter] = '\0';
             temporaryBoard[_finalBoardPosition.num, _finalBoardPosition.letter] = this.icon;
             this.position = _finalBoardPosition;
         }
+
         PieceManager.SetBoard(temporaryBoard);
+
+        Debug.Log($"[MOVE DEBUG] Triggering animation to {_finalBoardPosition.PosToString()}, associatedGameObject null={associatedGameObject == null}");
         associatedGameObject.GetComponent<MonoBehaviour>()
             .StartCoroutine(associatedGameObject.GetComponent<Pawn>()
             .MoveAnimation(BoardPos.StringToTileVector3(_finalBoardPosition.PosToString())));

@@ -331,7 +331,7 @@ public abstract class Piece
                                         PieceToMove.position.num == 1)) &&
                                 finalPosition.num - PieceToMove.position.num > 0 && !PieceToMove.AnyPieceBlocking(finalPosition, movementType))
                         {
-                            ((PawnHelper)PieceToMove).canMove2Squares = false;
+                            ((PawnHelper)PieceToMove).canMove2Squares = true;
                             return true;
                         }
                     }
@@ -349,7 +349,7 @@ public abstract class Piece
                                         PieceToMove.position.num == 6)) &&
                                 PieceToMove.position.num - finalPosition.num > 0 && !PieceToMove.AnyPieceBlocking(finalPosition, movementType))
                         {
-                            ((PawnHelper)PieceToMove).canMove2Squares = false;
+                            ((PawnHelper)PieceToMove).canMove2Squares = true;
                             return true;
                         }
                     }
@@ -382,11 +382,7 @@ public abstract class Piece
                                 && ((PawnHelper)temppiece).canMove2Squares
                                 && temppiece.position.num == 4)
                             {
-                                ((PawnHelper)temppiece).canMove2Squares = false;
-                                ((PawnHelper)temppiece).canBeEnPassant = false;
-                                temppiece.isActive = false; // actually capture the pawn
-                                ((PawnHelper)PieceToMove).canMove2Squares = false;
-                                ((PawnHelper)PieceToMove).canBeEnPassant = false;
+                                // DO NOT touch temppiece or flags here — just validate
                                 return true;
                             }
                         }
@@ -404,24 +400,19 @@ public abstract class Piece
                                 return true;
                             }
                         }
-                        // Black en passant
-                        else if (!PieceToMove.CheckPosToMove(PieceToMove, finalPosition, true) &&
+                        else if (PieceToMove.CheckPosToMove(PieceToMove, finalPosition, true) &&
                                 BoardPos.SquaresMoved(movementType, PieceToMove.position, finalPosition) == 1
                                 && PieceToMove.position.num - finalPosition.num > 0
                                 && FindPieceAtPos(finalPosition) == null)
                         {
-                            Piece temppiece = FindPieceAtPos(new BoardPos(finalPosition.num + 1, finalPosition.letter)); // +1 for black
+                            Piece temppiece = FindPieceAtPos(new BoardPos(finalPosition.num + 1, finalPosition.letter));
                             if (temppiece != null
                                 && temppiece.isWhite != PieceToMove.isWhite
                                 && temppiece is PawnHelper
                                 && ((PawnHelper)temppiece).canMove2Squares
                                 && temppiece.position.num == 3)
                             {
-                                ((PawnHelper)temppiece).canMove2Squares = false;
-                                ((PawnHelper)temppiece).canBeEnPassant = false;
-                                temppiece.isActive = false; // actually capture the pawn
-                                ((PawnHelper)PieceToMove).canMove2Squares = false;
-                                ((PawnHelper)PieceToMove).canBeEnPassant = false;
+                                // DO NOT touch temppiece or flags here — just validate
                                 return true;
                             }
                         }

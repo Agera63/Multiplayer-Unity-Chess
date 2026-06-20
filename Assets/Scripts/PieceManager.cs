@@ -34,6 +34,7 @@ public class PieceManager
         {
             if (p.position.PosToString().Equals(PieceToMove.ToLower()))
             {
+                UnityEngine.Debug.Log($"[UPDATE DEBUG] Calling Move() on {p.position.PosToString()} -> {PositionToMove}");
                 p.Move(BoardPos.StringToPos(PositionToMove.ToLower()));
                 if (MovementChar.Length == 6 && MovementChar[5] != '\0' && p is PawnHelper)
                 {
