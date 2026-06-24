@@ -20,17 +20,13 @@ public class PawnHelper : Piece
         string movementType = BoardPos.CheckMovementDirection(this.position, _finalBoardPosition);
         char[,] temporaryBoard = PieceManager.GetBoard();
 
-        Debug.Log($"[MOVE DEBUG] PawnHelper.Move() called: {this.position.PosToString()} -> {_finalBoardPosition.PosToString()}, movementType={movementType}, isWhite={this.isWhite}");
-
         if (!this.CheckPosToMove(this, _finalBoardPosition, true) && movementType.Equals("diagonal"))
         {
-            Debug.Log($"[MOVE DEBUG] Taking diagonal branch (enemy piece at destination)");
             foreach (Piece p in PieceManager.AllPieces)
             {
                 string PStringPosition = p.position.PosToString();
                 if (_finalBoardPosition.PosToString().Equals(PStringPosition) && p.isActive)
                 {
-                    Debug.Log($"[MOVE DEBUG] Capturing piece at {PStringPosition}");
                     p.isActive = false;
                     temporaryBoard[this.position.num, this.position.letter] = '\0';
                     temporaryBoard[_finalBoardPosition.num, _finalBoardPosition.letter] = this.icon;
@@ -60,7 +56,6 @@ public class PawnHelper : Piece
 
         PieceManager.SetBoard(temporaryBoard);
 
-        Debug.Log($"[MOVE DEBUG] Triggering animation to {_finalBoardPosition.PosToString()}, associatedGameObject null={associatedGameObject == null}");
         associatedGameObject.GetComponent<MonoBehaviour>()
             .StartCoroutine(associatedGameObject.GetComponent<Pawn>()
             .MoveAnimation(BoardPos.StringToTileVector3(_finalBoardPosition.PosToString())));
