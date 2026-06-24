@@ -11,6 +11,10 @@ public class MonoBehaviorPiece : MonoBehaviour
     private readonly float AnimationTimer = 1f; //seconds
     private float timer = 0;
 
+    /// <summary>
+    /// Checks for all legal moves the piece can make.
+    /// Afterwards, the legal moves tiles are colored in blue to show the user.
+    /// </summary>
     public void ShowLegalMoves()
     {
         helperClass.legalMoves.Clear();
@@ -23,6 +27,10 @@ public class MonoBehaviorPiece : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows the user a fluent moving animation for a moving piece on the board.
+    /// </summary>
+    /// <param name="pos">Vector3 of the final position to reach.</param>
     public IEnumerator MoveAnimation(Vector3 pos)
     {
         //Add sound for every moved piece
@@ -41,34 +49,6 @@ public class MonoBehaviorPiece : MonoBehaviour
 
         //Reset everything
         timer = 0;
-    }
-
-    public IEnumerator RejectedMoveAnimation()
-    {
-        float compteur = 1f;
-        while (compteur <= 0f)
-        {
-            transform.position = BoardPos.StringToTileVector3(helperClass.position.PosToString());
-
-            float xPositionOffset = Random.Range(0f, 0.6f);
-            float zPositionOffset = Random.Range(0f, 0.6f);
-
-            transform.position = new Vector3(xPositionOffset + transform.position.x, transform.position.y, zPositionOffset + transform.position.z);
-            compteur -= Time.deltaTime;
-
-            yield return null;
-        }
-        transform.position = BoardPos.StringToTileVector3(helperClass.position.PosToString());
-    }
-
-    private void ActivateTrigger()
-    {
-        trigger.gameObject.SetActive(true);
-    }
-
-    private void DeactivateTrigger()
-    {
-        trigger.gameObject.SetActive(false);
     }
 
     private void OnDestroy()
