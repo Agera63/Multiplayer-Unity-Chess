@@ -24,8 +24,22 @@ public abstract class Piece
         isActive = true;
     }
 
+
+    /// <summary>
+    /// Moves the piece to the given board position, handling captures along the way.
+    /// Also updates the board state and triggers the move animation on the associated GameObject.
+    /// </summary>
+    /// <param name="_boardPosition">The target position to move the piece to.</param>
     public abstract void Move(BoardPos _boardPosition);
 
+    /// <summary>
+    /// Checks if the move can be legal in any way in the current position.
+    /// This validates both piece mouvement rules and king being checked.
+    /// </summary>
+    /// <param name="MovementChar">A char array encoding the move in the format "e2-e4", 
+    /// with an optional 6th char for pawn promotion (e.g. 'q').</param>
+    /// <param name="isWhiteTurn">Whether it is currently white's turn.</param>
+    /// <returns>True if the move is fully legal, false otherwise.</returns>
     public static bool IsValidMove(char[] MovementChar, bool isWhiteTurn)
     {
         BoardPos finalPosition = BoardPos.StringToPos(MovementChar[3].ToString() +
@@ -35,10 +49,9 @@ public abstract class Piece
 
         try
         {
-            // CHANGE: check against whose turn it is, not player color
             if (PieceToMove == null || PieceToMove.isWhite != isWhiteTurn) return false;
 
-            return IsValidMoveWithCheckValidation(PieceToMove, finalPosition);
+            return IsLegalMove(PieceToMove, finalPosition);
         }
         catch (Exception e)
         {
@@ -47,6 +60,11 @@ public abstract class Piece
         }
     }
 
+    /// <summary>
+    /// Checks if the position currently has a piece on it.
+    /// </summary>
+    /// <param name="Pos">The board position we are checking.</param>
+    /// <returns>Returns a Piece if there has been 1 found, otherwise it returns null.</returns>
     public static Piece FindPieceAtPos(BoardPos Pos)
     {
         foreach (Piece p in PieceManager.AllPieces)
@@ -59,7 +77,15 @@ public abstract class Piece
         return null;
     }
 
-    public static bool IsValidMoveWithCheckValidation(Piece pieceToMove, BoardPos finalPosition)
+
+    /// <summary>
+    /// Validates a move by first checking the piece's movement rules, then simulating
+    /// the move to ensure it does not leave or put the friendly king in check.
+    /// </summary>
+    /// <param name="pieceToMove">The piece attempting to move.</param>
+    /// <param name="finalPosition">The target position of the move.</param>
+    /// <returns>True if the move is legal and does not endanger the friendly king, false otherwise.</returns>
+    public static bool IsLegalMove(Piece pieceToMove, BoardPos finalPosition)
     {
         if (!CheckPieceMovement(pieceToMove, finalPosition))
         {
@@ -85,6 +111,16 @@ public abstract class Piece
         }
     }
 
+    /// <summary>
+    /// Checks whether a piece can move to the given position based on occupancy.
+    /// </summary>
+    /// <param name="p">The piece attempting to move.</param>
+    /// <param name="posToMove">The target position to check.</param>
+    /// <param name="condition">
+    /// If true, returns false when any piece occupies the target (blocked).
+    /// If false, returns false only when a friendly piece occupies the target (can still capture enemies).
+    /// </param>
+    /// <returns>True if the move to the target position is allowed, false otherwise.</returns>
     public bool CheckPosToMove(Piece p, BoardPos posToMove, bool condition)
     {
         foreach (Piece tempPiece in PieceManager.AllPieces)
@@ -109,6 +145,12 @@ public abstract class Piece
         return true;
     }
 
+    /// <summary>
+    /// Checks whether a given square is under attack by any enemy piece.
+    /// </summary>
+    /// <param name="square">The board position to check.</param>
+    /// <param name="friendlyColor">The color of the friendly side.</param>
+    /// <returns>True if the square is attacked by at least one enemy piece, false otherwise.</returns>
     private static bool IsSquareUnderAttack(BoardPos square, bool friendlyColor)
     {
         foreach (Piece enemyPiece in PieceManager.AllPieces)
@@ -187,6 +229,13 @@ public abstract class Piece
         return false;
     }
 
+
+    /// <summary>
+    /// Checks whether any piece is blocking the path between the current piece and the target position.
+    /// </summary>
+    /// <param name="finalPos">The target position to check the path towards.</param>
+    /// <param name="movementType">The type of movement being performed (vertical, horizontal, or diagonal).</param>
+    /// <returns>True if any piece is blocking the path, false otherwise.</returns>
     private bool AnyPieceBlocking(BoardPos finalPos, string movementType)
     {
         int slotsToCheck = BoardPos.SquaresMoved(movementType, this.position, finalPos);
@@ -308,6 +357,13 @@ public abstract class Piece
         return false;
     }
 
+    /// <summary>
+    /// Checks whether a piece's movement to the target position follows the rules for its piece type,
+    /// including direction, distance, blocking, and special moves like en passant and castling.
+    /// </summary>
+    /// <param name="PieceToMove">The piece attempting to move.</param>
+    /// <param name="finalPosition">The target position of the move.</param>
+    /// <returns>True if the movement is valid for the given piece type, false otherwise.</returns>
     public static bool CheckPieceMovement(Piece PieceToMove, BoardPos finalPosition)
     {
         try
@@ -540,6 +596,10 @@ public abstract class Piece
         }
     }
 
+    /// <summary>
+    /// Initializes the castling map that links a king's castling destination square
+    /// to the rook's starting square. Only initializes once if not already set.
+    /// </summary>
     public static void InitializeCastleMap()
     {
         if (castlingMap == null)
@@ -552,7 +612,11 @@ public abstract class Piece
         }
     }
 
-    //Code for unity visuals 
+    /// <summary>
+    /// Computes and stores all legal moves for this piece by iterating over every square
+    /// on the board and calling <see cref="IsLegalMove"/> on each one.
+    /// Results are stored in <see cref="legalMoves"/> for use in move highlighting.
+    /// </summary>
     public void SetLegalMoves()
     {
         for (int number = 0; number < 8; number++)
@@ -560,7 +624,7 @@ public abstract class Piece
             for (int letter = 0; letter < 8; letter++)
             {
                 BoardPos boardPositionToCheck = new BoardPos(number, letter);
-                if (IsValidMoveWithCheckValidation(this, boardPositionToCheck))
+                if (IsLegalMove(this, boardPositionToCheck))
                 {
                     legalMoves.Add(boardPositionToCheck);
                 }
@@ -568,6 +632,10 @@ public abstract class Piece
         }
     }
 
+    /// <summary>
+    /// Resets the color of all board tiles that were highlighted in blue back to their
+    /// original color (white or black) based on the tile's <see cref="BoardTile.isWhite"/> property.
+    /// </summary>
     public void HideLegalMoves()
     {
         foreach (GameObject go in BoardPos.GameTiles)
