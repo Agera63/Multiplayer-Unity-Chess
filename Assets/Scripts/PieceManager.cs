@@ -64,6 +64,10 @@ public class PieceManager
         return k.canCastle && r.canCastle && k.isWhite == r.isWhite;
     }
 
+    /// <summary>
+    /// Rebuilds the 8x8 char board from scratch using the current state of all active pieces.
+    /// Should be called after any move to keep the board in sync with the piece list.
+    /// </summary>
     public static void InitializeBoard()
     {
         Board = new char[8, 8];
@@ -76,6 +80,10 @@ public class PieceManager
         }
     }
 
+    /// <summary>
+    /// Removes all inactive pieces from <see cref="AllPieces"/> and fires the 
+    /// <see cref="removeGameObj"/> event for each one so their Unity GameObjects get destroyed.
+    /// </summary>
     private static void RemoveInactivePieces()
     {
         List<Piece> toRemove = new List<Piece>();
