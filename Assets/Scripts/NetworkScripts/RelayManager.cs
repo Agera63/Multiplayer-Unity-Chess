@@ -20,6 +20,10 @@ public class RelayManager : MonoBehaviour
     [SerializeField] private TMP_Text codeText;
     [SerializeField] private GameObject joinSection;
 
+    /// <summary>
+    /// Initializes Unity Services and anonymous authentication if not already done,
+    /// then registers the button listeners for hosting, joining, and leaving a relay session.
+    /// </summary>
     private async void Start()
     {
         if (UnityServices.State != ServicesInitializationState.Initialized)
@@ -33,6 +37,10 @@ public class RelayManager : MonoBehaviour
         backBtn.onClick.AddListener(LeaveRelay);
     }
 
+    /// <summary>
+    /// Creates a Unity Relay allocation, displays the generated join code to the host,
+    /// starts the host session, and waits for a client to connect before loading the game scene.
+    /// </summary>
     private async void CreateRelay()
     {
         if (NetworkManager.Singleton.IsListening)
@@ -62,6 +70,11 @@ public class RelayManager : MonoBehaviour
         catch (RelayServiceException e) { Debug.Log(e); }
     }
 
+    /// <summary>
+    /// Triggered when a client connects to the host's relay session.
+    /// Randomly assigns colors to both players, then loads the game scene for all connected clients.
+    /// </summary>
+    /// <param name="clientId">The network ID of the client that connected.</param>
     private void OnClientConnected(ulong clientId)
     {
         if (clientId == NetworkManager.Singleton.LocalClientId) return;
@@ -78,12 +91,24 @@ public class RelayManager : MonoBehaviour
         NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
     }
 
+    /// <summary>
+    /// Triggered once all clients have finished loading the game scene.
+    /// Sends the client's color assignment via RPC so they can initialize their game.
+    /// </summary>
+    /// <param name="sceneName">The name of the scene that was loaded.</param>
+    /// <param name="mode">The load scene mode used.</param>
+    /// <param name="clientsCompleted">List of client IDs that successfully loaded the scene.</param>
+    /// <param name="clientsTimedOut">List of client IDs that timed out during scene loading.</param>
     private void OnSceneLoaded(string sceneName, LoadSceneMode mode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
         NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnSceneLoaded;
         NetworkGameManager.Instance.SetClientColorClientRpc(GameModeManager.instance.clientColor);
     }
 
+    /// <summary>
+    /// Joins an existing relay session using the join code entered by the player,
+    /// sets the game mode to online, and starts the client connection.
+    /// </summary>
     private async void JoinRelay()
     {
         if (codeInput.text is null || codeInput.text.Equals(string.Empty)) return;
@@ -107,9 +132,6 @@ public class RelayManager : MonoBehaviour
                 joinAllocation.HostConnectionData
             );
 
-            // FIX: set PvP_Online BEFORE StartClient() so that when the scene
-            // loads and GameManager.Start() runs, AssignControllers() sees the
-            // correct mode and creates the NetworkController
             GameModeManager.instance.SetGameMode(GameMode.PvP_Online);
 
             NetworkManager.Singleton.StartClient();
@@ -117,6 +139,10 @@ public class RelayManager : MonoBehaviour
         catch (RelayServiceException e) { Debug.Log(e); }
     }
 
+    /// <summary>
+    /// Shuts down the current network session and resets the relay UI
+    /// back to its initial state for hosting or joining a new session.
+    /// </summary>
     public void LeaveRelay()
     {
         if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsClient)
