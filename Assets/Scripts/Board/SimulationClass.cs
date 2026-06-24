@@ -7,6 +7,11 @@ public class SimulationClass
     private List<Piece> GOCopy;
     private KingHelper KingToMove;
 
+    /// <summary>
+    /// Initializes a new simulation by deep copying the current board state and piece list,
+    /// then locating the king to track within the simulation.
+    /// </summary>
+    /// <param name="k">The king to track during the simulation.</param>
     private SimulationClass(KingHelper k)
     {
         BoardCopy = DeepCopyBoard(PieceManager.GetBoard());
@@ -14,6 +19,14 @@ public class SimulationClass
         KingToMove = FindKing(k);
     }
 
+    /// <summary>
+    /// Simulates a move and checks whether it resolves the king being in check.
+    /// Used when the king is already in check to validate that a move gets it out.
+    /// </summary>
+    /// <param name="pieceToMove">The piece attempting to move.</param>
+    /// <param name="finalPos">The target position of the move.</param>
+    /// <param name="k">The king currently in check.</param>
+    /// <returns>True if the move successfully removes the king from check, false otherwise.</returns>
     public static bool KingSim(Piece pieceToMove, BoardPos finalPos, KingHelper k)
     {
         SimulationClass sc = new SimulationClass(k);
@@ -28,6 +41,13 @@ public class SimulationClass
         return !sc.IsKingCheckedSim(sc.KingToMove);
     }
 
+    /// <summary>
+    /// Simulates a move and checks whether it would leave the friendly king in check.
+    /// Used when the king is not currently in check to ensure the move doesn't create one.
+    /// </summary>
+    /// <param name="pieceToMove">The piece attempting to move.</param>
+    /// <param name="finalPos">The target position of the move.</param>
+    /// <returns>True if the move is safe and does not put the friendly king in check, false otherwise.</returns>
     public static bool WillMoveCheckKing(Piece pieceToMove, BoardPos finalPos)
     {
         KingHelper kingToCheck;
@@ -50,6 +70,12 @@ public class SimulationClass
         return !sc.IsKingCheckedSim(sc.KingToMove);
     }
 
+    /// <summary>
+    /// Checks whether the given king is in checkmate by verifying it is in check
+    /// and that no legal move exists for any friendly piece to resolve it.
+    /// </summary>
+    /// <param name="k">The king to check for checkmate.</param>
+    /// <returns>True if the king is in checkmate, false otherwise.</returns>
     public static bool IsCheckMate(KingHelper k)
     {
         if (!k.IsChecked())
@@ -78,6 +104,11 @@ public class SimulationClass
         return true;
     }
 
+    /// <summary>
+    /// Finds the simulated copy of the given king within the deep-copied piece list.
+    /// </summary>
+    /// <param name="K">The real king to find the simulation equivalent of.</param>
+    /// <returns>The simulated <see cref="KingHelper"/> copy, or null if not found.</returns>
     private KingHelper FindKing(KingHelper K)
     {
         foreach (Piece p in GOCopy)
@@ -88,6 +119,12 @@ public class SimulationClass
         return null;
     }
 
+    /// <summary>
+    /// Applies a move to the simulation's deep-copied board and piece list,
+    /// handling captures, en passant, and pawn promotion within the simulation.
+    /// </summary>
+    /// <param name="MovementChar">A char array encoding the move in the format "e2-e4",
+    /// with an optional 6th char for pawn promotion (e.g. 'q').</param>
     private void UpdateSim(char[] MovementChar)
     {
         string PieceToMove = MovementChar[0].ToString() + MovementChar[1].ToString().ToLower();
@@ -135,6 +172,12 @@ public class SimulationClass
         }
     }
 
+    /// <summary>
+    /// Moves a piece within the simulation, handling captures and en passant
+    /// without affecting the actual game state.
+    /// </summary>
+    /// <param name="targetPos">The target position to move the piece to.</param>
+    /// <param name="PieceToMove">The simulated piece to move.</param>
     private void MovementSim(BoardPos targetPos, Piece PieceToMove)
     {
         Piece targetPiece = FindPieceOfPosSim(targetPos);
@@ -165,6 +208,12 @@ public class SimulationClass
         PieceToMove.position = targetPos;
     }
 
+    /// <summary>
+    /// Checks whether the given simulated king is in check by testing
+    /// whether any enemy piece can legally attack its position.
+    /// </summary>
+    /// <param name="k">The simulated king to check.</param>
+    /// <returns>True if the king is in check, false otherwise.</returns>
     private bool IsKingCheckedSim(KingHelper k)
     {
         BoardPos kingPos = k.position;
@@ -185,6 +234,11 @@ public class SimulationClass
         return false;
     }
 
+    /// <summary>
+    /// Finds a simulated piece at the given board position within the deep-copied piece list.
+    /// </summary>
+    /// <param name="position">The board position to search at.</param>
+    /// <returns>The simulated <see cref="Piece"/> at that position, or null if none exists.</returns>
     private Piece FindPieceOfPosSim(BoardPos position)
     {
         foreach (Piece p in GOCopy)
@@ -195,6 +249,17 @@ public class SimulationClass
         return null;
     }
 
+    /// <summary>
+    /// Checks whether a simulated piece can move to the target position based on occupancy,
+    /// mirroring <see cref="Piece.CheckPosToMove"/> but operating on the deep-copied piece list.
+    /// </summary>
+    /// <param name="p">The simulated piece attempting to move.</param>
+    /// <param name="posToMove">The target position to check.</param>
+    /// <param name="condition">
+    /// If true, checks for any piece at the target position (blocked by both friendly and enemy).
+    /// If false, checks only for a friendly piece at the target position (can still capture enemies).
+    /// </param>
+    /// <returns>True if the move to the target position is allowed, false otherwise.</returns>
     private bool CheckPosToMoveSim(Piece p, BoardPos posToMove, bool condition)
     {
         foreach (Piece tempPiece in GOCopy)
@@ -210,6 +275,14 @@ public class SimulationClass
         return true;
     }
 
+    /// <summary>
+    /// Checks whether a simulated piece's movement to the target position follows the rules
+    /// for its piece type, mirroring <see cref="Piece.CheckPieceMovement"/> but operating
+    /// on the deep-copied board and piece list.
+    /// </summary>
+    /// <param name="PieceToMove">The simulated piece attempting to move.</param>
+    /// <param name="finalPosition">The target position of the move.</param>
+    /// <returns>True if the movement is valid for the given piece type, false otherwise.</returns>
     private bool CheckPieceMovementSim(Piece PieceToMove, BoardPos finalPosition)
     {
         try
@@ -219,8 +292,6 @@ public class SimulationClass
 
             if (movementType.Equals("vertical") && PieceToMove is PawnHelper)
             {
-                // Pawns moving forward do NOT threaten the king — only diagonals do.
-                // FIX 5: Old sim treated vertical pawn moves as threats. Removed entirely.
                 return false;
             }
             else if (movementType.Equals("diagonal") && PieceToMove is PawnHelper)
@@ -271,6 +342,14 @@ public class SimulationClass
         }
     }
 
+    /// <summary>
+    /// Checks whether any piece is blocking the path between a simulated piece and its target position,
+    /// mirroring <see cref="Piece.AnyPieceBlocking"/> but operating on the deep-copied board.
+    /// </summary>
+    /// <param name="pm">The simulated piece attempting to move.</param>
+    /// <param name="finalPos">The target position to check the path towards.</param>
+    /// <param name="movementType">The type of movement being performed (vertical, horizontal, or diagonal).</param>
+    /// <returns>True if any piece is blocking the path, false otherwise.</returns>
     private bool AnyPieceBlockingSim(Piece pm, BoardPos finalPos, string movementType)
     {
         int slotsToCheck = BoardPos.SquaresMoved(movementType, pm.position, finalPos);
@@ -304,6 +383,11 @@ public class SimulationClass
         return false;
     }
 
+    /// <summary>
+    /// Creates a deep copy of the given 8x8 char board array.
+    /// </summary>
+    /// <param name="original">The board to copy.</param>
+    /// <returns>A new 8x8 char array with the same values as the original.</returns>
     private static char[,] DeepCopyBoard(char[,] original)
     {
         char[,] copy = new char[original.GetLength(0), original.GetLength(1)];
@@ -311,6 +395,11 @@ public class SimulationClass
         return copy;
     }
 
+    /// <summary>
+    /// Creates a deep copy of all active pieces in <see cref="PieceManager.AllPieces"/>,
+    /// using each piece type's copy constructor to preserve state without affecting the originals.
+    /// </summary>
+    /// <returns>A list of deep-copied <see cref="Piece"/> objects representing the current game state.</returns>
     private static List<Piece> DeepCopyPieces()
     {
         List<Piece> tempBoard = new List<Piece>();
