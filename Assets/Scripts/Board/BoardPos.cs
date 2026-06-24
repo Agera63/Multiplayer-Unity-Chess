@@ -39,7 +39,7 @@ public class BoardPos
     }
 
     /// <summary>
-    /// Getter for String version of the position
+    /// Getter for String version of the position.
     /// </summary>
     /// <returns>position in string</returns>
     public string PosToString()
@@ -49,10 +49,10 @@ public class BoardPos
     }
 
     /// <summary>
-    /// Take a String like e4 and turns it into a new BoardPos object
+    /// Take a String like e4 and turns it into a new BoardPos object.
     /// </summary>
-    /// <param name="pos">The position we want to convert</param>
-    /// <returns>New BoardPos object</returns>
+    /// <param name="pos">The position we want to convert.</param>
+    /// <returns>New BoardPos object.</returns>
     public static BoardPos StringToPos(string pos)
     {
         int temp = 8;
@@ -120,7 +120,7 @@ public class BoardPos
     /// <param name="movementType">what type of movement (vertical, horizontal, diagonal)</param>
     /// <param name="start">initial position</param>
     /// <param name="finish">final position</param>
-    /// <returns>number of squares it moved</returns>
+    /// <returns>Int of number of squares the piece moved.</returns>
     public static int SquaresMoved(string movementType, BoardPos start, BoardPos finish)
     {
         int counter = 0;
@@ -135,6 +135,11 @@ public class BoardPos
         return counter;
     }
 
+    /// <summary>
+    /// Converts a string position ("a3") into a vector3 in the unity world.
+    /// </summary>
+    /// <param name="position">The string of the position to convert.</param>
+    /// <returns>A Vector3 position of the tile in Unity.</returns>
     public static Vector3 StringToTileVector3(string position)
     {
         foreach (GameObject go in GameTiles.ToList())
@@ -147,6 +152,11 @@ public class BoardPos
         return new Vector3(0,0,0);
     }
 
+    /// <summary>
+    /// Converts a vector3 position into a BoardPos object.
+    /// </summary>
+    /// <param name="position">The Vector3 of the piece to convert.</param>
+    /// <returns>A BoardPos object with the correct converted position.</returns>
     public static BoardPos VectorToBoardPosObject(Vector3 position)
     {
         foreach (GameObject go in GameTiles.ToList())
@@ -160,6 +170,11 @@ public class BoardPos
         return null;
     }
 
+    /// <summary>
+    /// Returns the tile for the string position that is given.
+    /// </summary>
+    /// <param name="pos">The string position ("a3") of the tile you are looking for.</param>
+    /// <returns>A tile GameObject that matches the string position.</returns>
     public static GameObject GetTileByPosition(string pos)
     {
         foreach(GameObject go in GameTiles)
