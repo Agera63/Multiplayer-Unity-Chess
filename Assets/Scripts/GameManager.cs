@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
 
     private bool whoWon;
 
+    private HumanController humanController => currentController as HumanController;
+
     void Start()
     {
         colorTurn = true;
@@ -75,18 +77,34 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Starts the turn for the current player by determining whose turn it is
+    /// and calling <see cref="IPlayerController.StartTurn"/> on the appropriate controller,
+    /// passing <see cref="TryMovePiece"/> as the callback for when a move is ready.
+    /// </summary>
     private void StartTurn()
     {
         currentController = colorTurn ? whiteController : blackController;
         currentController.StartTurn((moveString) => TryMovePiece(moveString));
     }
 
+    /// <summary>
+    /// Initializes the online game once both players are connected and colors have been assigned.
+    /// Called by <see cref="NetworkGameManager"/> on the client side after receiving their color assignment.
+    /// </summary>
     public void InitializeOnlineGame()
     {
         AssignControllers();
         StartTurn();
     }
 
+    /// <summary>
+    /// Attempts to process a move string received from a controller, handling
+    /// pawn promotion separately before delegating to <see cref="ExecuteMove"/>.
+    /// Also forwards the move to the opponent over the network if playing online.
+    /// </summary>
+    /// <param name="moveString">The move to attempt in the format "e2-e4",
+    /// with an optional 6th char for pawn promotion (e.g. "e7-e8q").</param>
     private void TryMovePiece(string moveString)
     {
         mouvementChar = moveString.ToCharArray();
@@ -121,6 +139,10 @@ public class GameManager : MonoBehaviour
         ExecuteMove();
     }
 
+    /// <summary>
+    /// Validates and executes the current move, updating the board state, clearing
+    /// en passant flags, flipping the turn, and checking for checkmate.
+    /// </summary>
     private void ExecuteMove()
     {
         if (Piece.IsValidMove(mouvementChar, colorTurn))
@@ -151,6 +173,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Creates the correct game controllers depending on the player color
+    /// and the type of game mode selected in <see cref="GameModeManager"/> class.
+    /// </summary>
     private void AssignControllers()
     {
         bool playerIsWhite = GameModeManager.instance.playerColor;
@@ -191,8 +217,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private HumanController humanController => currentController as HumanController;
-
+    /// <summary>
+    /// Checks if the clicked GameObject returned is a valid MonoBehaviorPiece.
+    /// If so, it will also assign that piece to <see cref="selectedPiece"/> 
+    /// and the assosiated helperScript to <see cref="pieceHelperScript"/>.
+    /// </summary>
+    /// <param name="clickedObject">Clicked GameObject returned from <see cref="ClickHelper.FindClickedObject"/></param>
+    /// <returns>True if the piece is a valid MonoBehaviorPiece. False otherwise.</returns>
     private bool isValidPiece(GameObject clickedObject)
     {
         if (pieceHelperScript is not null) pieceHelperScript.HideLegalMoves();
@@ -246,12 +277,23 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Calls the creation of a new piece after a pawn has promoted and
+    /// destroys the pawn afterwards.
+    /// </summary>
+    /// <param name="type">A <see cref="PieceType"/> to create on the board.</param>
+    /// <param name="position">The position where this new piece should belong.</param>
+    /// <param name="pawn">The <see cref="PawnHelper"/> (<see cref="Piece"/>) to be removed.</param>
     private void PawnPromotion(PieceType type, Vector3 position, Piece pawn)
     {
         CreateNewPiece(type, position + new Vector3(0, 0.05f, 0), pawn);
         DestroyPiece(pawn);
     }
 
+    /// <summary>
+    /// Every move, it checks if either the white or black king is checkmated.
+    /// </summary>
+    /// <returns>True if either kings are mated. False otherwise.</returns>
     public bool IsGameOver()
     {
         if (SimulationClass.IsCheckMate(KingHelper.FindWhiteKing()))
@@ -267,6 +309,10 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Shows the winner of the game using <see cref="gameOverText"/> text.
+    /// After two seconds of waiting, the user will be sent back to the "MainMenu" scene.
+    /// </summary>
     IEnumerator CheckMateSteps()
     {
         gameOverText.GetComponent<TMP_Text>().text = "Game Over! \n " + (whoWon ? "White wins!" : "Black wins!");
@@ -274,6 +320,13 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
+    /// <summary>
+    /// Waits for the human player to select a promotion piece via the UI,
+    /// then calls <see cref="ExecuteMove"/> once the selection has been made.
+    /// </summary>
+    /// <param name="mouvementChar">The char array encoding the pawn's move.</param>
+    /// <param name="p">The <see cref="Pawn"/> that is being promoted.</param>
+    /// <returns>An <see cref="IEnumerator"/> to be used with StartCoroutine.</returns>
     IEnumerator HandlePromotion(char[] mouvementChar, Pawn p)
     {
         if (currentController.IsHuman)
@@ -289,6 +342,10 @@ public class GameManager : MonoBehaviour
         ExecuteMove();
     }
 
+    /// <summary>
+    /// Correctly adds the selected character of the pawn promotion to the <see cref="mouvementChar"/>
+    /// </summary>
+    /// <param name="selection">The correct character of the piece to be promoted ('q','b','n','r').</param>
     private void SelectedPromotionPiece(char selection)
     {
         if (mouvementChar.Length != 6)
@@ -302,8 +359,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Removes the GameObject of <see cref="Piece"/> that is given.
+    /// </summary>
+    /// <param name="pieceToRemove">The <see cref="Piece"/> object that need to its GameObject removed.</param>
     private void DestroyPiece(Piece pieceToRemove) => Destroy(pieceToRemove.associatedGameObject);
 
+    /// <summary>
+    /// Allows new pieces to be created and positioned correctly on the board.
+    /// This is currently only used for pawn promotions.
+    /// </summary>
+    /// <param name="type">The type of piece that the pawn will promote to.</param>
+    /// <param name="position">The vector3 position to place the piece at.</param>
+    /// <param name="piece">The newly created piece helper script.</param>
     private void CreateNewPiece(PieceType type, Vector3 position, Piece piece)
     {
         string color = piece.isWhite ? "White" : "Black";
@@ -319,6 +387,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles the opponent disconnecting mid-game by shutting down the network session
+    /// and triggering the game over sequence with the local player as the winner.
+    /// </summary>
     private void HandleOpponentDisconnected()
     {
         NetworkGameManager.OnOpponentDisconnected -= HandleOpponentDisconnected;
