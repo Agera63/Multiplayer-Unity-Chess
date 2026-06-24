@@ -18,12 +18,25 @@ public class Pawn : MonoBehaviorPiece
         GameMenuController.sendPromotionValue += SendPromotionSelection;
     }
 
+    /// <summary>
+    /// Freezes the game and shows the promotionUI so that the player can select to what type of piece 
+    /// to promote the pawn to.
+    /// </summary>
     public void PromotePawn() 
     {
         promotionUi.gameObject.SetActive(true);
         Time.timeScale = 0f;
     }
 
+    /// <summary>
+    /// Handles the promotion selection made by the player, resuming the game's time scale,
+    /// hiding the promotion UI, and firing the <see cref="promotionResult"/> event
+    /// with the selected piece character.
+    /// </summary>
+    /// <param name="selection">
+    /// A char representing the piece the player selected to promote to
+    /// ('q' for Queen, 'r' for Rook, 'b' for Bishop, 'n' for Knight).
+    /// </param>
     private void SendPromotionSelection(char selection)
     {
         Time.timeScale = 1f;

@@ -61,6 +61,15 @@ public class PawnHelper : Piece
             .MoveAnimation(BoardPos.StringToTileVector3(_finalBoardPosition.PosToString())));
     }
 
+    /// <summary>
+    /// Handles the promotion of a pawn by converting the given promotion character
+    /// into a <see cref="PieceType"/> and firing the <see cref="promote"/> event
+    /// to trigger the creation of the new piece in the game world.
+    /// </summary>
+    /// <param name="pieceToPromote">
+    /// A char representing the piece to promote to 
+    /// ('q' for Queen, 'r' for Rook, 'b' for Bishop, 'n' for Knight).
+    /// </param>
     public void Promotion(char pieceToPromote)
     {
         PieceType promotionSelection = PieceType.Pawn;
@@ -72,6 +81,16 @@ public class PawnHelper : Piece
         promote?.Invoke(promotionSelection, BoardPos.StringToTileVector3(position.PosToString()), this);
     }
 
+    /// <summary>
+    /// Creates and returns a new simulation-only piece of the promoted type,
+    /// used by <see cref="SimulationClass"/> to validate moves involving pawn promotion
+    /// without affecting the actual game state.
+    /// </summary>
+    /// <param name="pieceToPromote">
+    /// A char representing the piece to promote to
+    /// ('q' for Queen, 'r' for Rook, 'b' for Bishop, 'n' for Knight).
+    /// </param>
+    /// <returns>A new <see cref="Piece"/> of the promoted type, or null if the char is unrecognized.</returns>
     public Piece PromotionSimulation(char pieceToPromote)
     {
         switch (pieceToPromote)
@@ -84,5 +103,11 @@ public class PawnHelper : Piece
         }
     }
 
+    /// <summary>
+    /// Checks whether a given callback is already subscribed to the <see cref="promote"/> event,
+    /// preventing duplicate subscriptions.
+    /// </summary>
+    /// <param name="creationMethod">The callback to check for in the promote event's invocation list.</param>
+    /// <returns>True if the callback is already subscribed, false otherwise.</returns>
     public bool CheckPromotionActions(Action<PieceType, Vector3, Piece> creationMethod) { return promote?.GetInvocationList().Contains(creationMethod) ?? false; }
 }
