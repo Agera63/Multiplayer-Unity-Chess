@@ -5,22 +5,22 @@ using UnityEngine;
 
 namespace ChessClient
 {
-    public class StockFishChessClient
+    public class StockFishChesClient
     {
         private static readonly string STOCKFISH_PATH = Application.streamingAssetsPath + "/Stockfish/stockfish-windows-x86-64";
         private static readonly int SEARCH_DEPTH = 15;
         private static readonly string[] UCI_INIT_COMMANDS = { "uci" };
 
-        // Reuse process for better performance (optional enhancement)
         private static Process stockfishProcess;
         private static StreamWriter processWriter;
         private static StreamReader processReader;
 
         /// <summary>
-        /// Get the best move from Stockfish for the current board position
+        /// Gets the best move from Stockfish for the current board position.
+        /// Initializes the Stockfish process, queries it, and cleans up afterward.
         /// </summary>
-        /// <param name="board">8x8 char array representing the chess board</param>
-        /// <returns>Best move in format "e2-e4" or "No move found"</returns>
+        /// <param name="board">An 8x8 char array representing the current chess board state.</param>
+        /// <returns>The best move in the format "e2-e4", or "No move found" if Stockfish cannot determine one.</returns>
         public static string GetBestMoveFromBoard(char[,] board)
         {
             string fen = BoardToFen(board);
@@ -35,6 +35,10 @@ namespace ChessClient
             }
         }
 
+        /// <summary>
+        /// Starts the Stockfish process and initializes the UCI protocol,
+        /// setting up the standard input/output streams for communication.
+        /// </summary>
         private static void InitializeStockfishProcess()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
@@ -50,11 +54,15 @@ namespace ChessClient
             processWriter = stockfishProcess.StandardInput;
             processReader = stockfishProcess.StandardOutput;
 
-            // Initialize UCI protocol
             SendCommand("uci");
             WaitForUciOk();
         }
 
+        /// <summary>
+        /// Sends a FEN position to Stockfish and retrieves the best move at the configured search depth.
+        /// </summary>
+        /// <param name="fen">The FEN string representing the current board position.</param>
+        /// <returns>The best move in the format "e2-e4", or "No move found" if none is returned.</returns>
         private static string GetBestMoveFromFen(string fen)
         {
             SendCommand("position fen " + fen);
@@ -76,12 +84,22 @@ namespace ChessClient
             return "No move found";
         }
 
+        /// <summary>
+        /// Sends a command string to the Stockfish process via standard input.
+        /// </summary>
+        /// <param name="command">The UCI command to send.</param>
         private static void SendCommand(string command)
         {
             processWriter.WriteLine(command);
             processWriter.Flush();
         }
 
+        /// <summary>
+        /// Converts a raw Stockfish move string (e.g. "e2e4") into the game's
+        /// internal format (e.g. "e2-e4"), appending a promotion character if present.
+        /// </summary>
+        /// <param name="move">The raw move string returned by Stockfish.</param>
+        /// <returns>The formatted move string, or "No move found" if the input is invalid.</returns>
         private static string FormatMove(string move)
         {
             if (move != null && move.Length >= 4)
@@ -94,24 +112,34 @@ namespace ChessClient
             return "No move found";
         }
 
+        /// <summary>
+        /// Converts the internal 8x8 char board into a FEN string that Stockfish can interpret.
+        /// </summary>
+        /// <param name="board">An 8x8 char array representing the current chess board state.</param>
+        /// <returns>A FEN string representing the board position and active color.</returns>
         private static string BoardToFen(char[,] board)
         {
-            System.Text.StringBuilder fen = new System.Text.StringBuilder(80); // Pre-allocate capacity
+            System.Text.StringBuilder fen = new System.Text.StringBuilder(80);
 
-            // Convert board to FEN notation (rank 8 to rank 1)
             for (int row = 7; row >= 0; row--)
             {
                 AppendRankToFen(fen, board, row);
                 if (row > 0) fen.Append('/');
             }
 
-            // Add FEN metadata: active color, castling, en passant, halfmove, fullmove
-            bool stockfishIsWhite = !GameModeManager.instance.playerColor; // Stockfish plays opposite of player
+            bool stockfishIsWhite = !GameModeManager.instance.playerColor;
             fen.Append(' ').Append(stockfishIsWhite ? 'w' : 'b').Append(" - - 0 1");
 
             return fen.ToString();
         }
 
+        /// <summary>
+        /// Appends a single rank (row) of the board to the FEN string builder,
+        /// encoding empty squares as numbers and pieces as their char icons.
+        /// </summary>
+        /// <param name="fen">The StringBuilder to append the rank to.</param>
+        /// <param name="board">The full 8x8 char board.</param>
+        /// <param name="row">The row index (0–7) to encode.</param>
         private static void AppendRankToFen(System.Text.StringBuilder fen, char[,] board, int row)
         {
             int emptyCount = 0;
@@ -140,6 +168,11 @@ namespace ChessClient
             }
         }
 
+        /// <summary>
+        /// Blocks until Stockfish responds with "uciok", confirming the UCI protocol
+        /// has been successfully initialized.
+        /// </summary>
+        /// <exception cref="IOException">Thrown if Stockfish does not respond with "uciok".</exception>
         private static void WaitForUciOk()
         {
             string line;
@@ -153,6 +186,10 @@ namespace ChessClient
             throw new IOException("Failed to initialize UCI protocol with Stockfish");
         }
 
+        /// <summary>
+        /// Sends the quit command to Stockfish and closes all streams,
+        /// then terminates the process if it does not exit within one second.
+        /// </summary>
         private static void CleanupProcess()
         {
             try
