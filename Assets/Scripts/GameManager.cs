@@ -27,6 +27,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        if (GameModeManager.instance.selectedMode != GameMode.PvP_Online)
+            Instantiate(player).GetComponent<CameraScript>()?.PositionCamera();
+
         colorTurn = true;
         selectedPiece = null;
 
