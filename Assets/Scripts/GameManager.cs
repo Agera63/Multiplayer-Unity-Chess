@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
     private IPlayerController blackController;
     private IPlayerController currentController;
 
-    private bool whoWon;
+    private bool? whoWon;
 
     private HumanController humanController => currentController as HumanController;
 
@@ -309,6 +309,10 @@ public class GameManager : MonoBehaviour
             whoWon = true;
             return true;
         }
+        else if (SimulationClass.IsStalemate(colorTurn))
+        {
+            return true;
+        }
         return false;
     }
 
@@ -318,9 +322,17 @@ public class GameManager : MonoBehaviour
     /// </summary>
     IEnumerator CheckMateSteps()
     {
-        gameOverText.GetComponent<TMP_Text>().text = "Game Over! \n " + (whoWon ? "White wins!" : "Black wins!");
-        yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene("MainMenu");
+        if(whoWon is not null)
+        {
+            gameOverText.GetComponent<TMP_Text>().text = "Game Over! \n " + (whoWon ?? false ? "White wins!" : "Black wins!");
+            yield return new WaitForSeconds(2f);
+            SceneManager.LoadScene("MainMenu");
+        } else
+        {
+            gameOverText.GetComponent<TMP_Text>().text = "Game Over! \n " + "Stalemate";
+            yield return new WaitForSeconds(2f);
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 
     /// <summary>

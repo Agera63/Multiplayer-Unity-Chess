@@ -71,6 +71,31 @@ public class SimulationClass
     }
 
     /// <summary>
+    /// Simulates to see if the current position is a stalemate
+    /// </summary>
+    /// <param name="isWhiteTurn">The current color that plays</param>
+    /// <returns>True if the position is a stalemate, false otherwise.</returns>
+    public static bool IsStalemate(bool isWhiteTurn)
+    {
+        foreach (Piece p in PieceManager.AllPieces)
+        {
+            if (p.isWhite == isWhiteTurn && p.isActive)
+            {
+                for (int num = 0; num < 8; num++)
+                {
+                    for (int letter = 0; letter < 8; letter++)
+                    {
+                        BoardPos targetPos = new BoardPos(num, letter);
+                        if (Piece.CheckPieceMovement(p, targetPos) && KingSim(p, targetPos, isWhiteTurn ? KingHelper.FindWhiteKing() : KingHelper.FindBlackKing()))
+                            return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /// <summary>
     /// Checks whether the given king is in checkmate by verifying it is in check
     /// and that no legal move exists for any friendly piece to resolve it.
     /// </summary>
