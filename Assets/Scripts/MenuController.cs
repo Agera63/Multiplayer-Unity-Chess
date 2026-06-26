@@ -9,18 +9,29 @@ public class MenuController : MonoBehaviour
     [SerializeField] private GameObject onlineCode;
     [SerializeField] private GameObject joinSection;
 
+    /// <summary>
+    /// Once the bot gamemode has been selected, it will open a menu
+    /// where the color picking menu will show up.
+    /// </summary>
     public void BotHanlder()
     {
         GameModeManager.instance.SetGameMode(GameMode.PvE);
         botColorPick.gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// Opens the online menu so it can host or enter a code.
+    /// </summary>
     public void OnlineHanlder()
     {
         GameModeManager.instance.SetGameMode(GameMode.PvP_Online);
         onlineCode.gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// Attachted to the quit button.
+    /// Allows the user to quit the application.
+    /// </summary>
     public void Quitter()
     {
         #if UNITY_EDITOR
@@ -30,19 +41,30 @@ public class MenuController : MonoBehaviour
         #endif
     }
 
-    //For botColorPick menu
+    /// <summary>
+    /// This is attached to the white color pick.
+    /// Once this is selected, the user color vs Stockfish is white.
+    /// </summary>
     public void WhitePick()
     {
         GameModeManager.instance.SetPlayerColor(true);
         SceneManager.LoadScene("GameScene");
     }
 
+    /// <summary>
+    /// This is attached to the black color pick.
+    /// Once this is selected, the user color vs Stockfish is black.
+    /// </summary>
     public void BlackPick()
     {
         GameModeManager.instance.SetPlayerColor(false);
         SceneManager.LoadScene("GameScene");
     }
 
+    /// <summary>
+    /// This is attached to the random color pick.
+    /// Once this is selected, the user color vs Stockfish is random.
+    /// </summary>
     public void RandomPick()
     {
         int random = Random.Range(0, 2);
@@ -54,7 +76,9 @@ public class MenuController : MonoBehaviour
         SceneManager.LoadScene("GameScene");
     }
 
-    //For Join Code menu
+    /// <summary>
+    /// Only for online menu, this allows the menu to close.
+    /// </summary>
     public void CloseJoiningMenu()
     {
         joinSection.SetActive(true);
