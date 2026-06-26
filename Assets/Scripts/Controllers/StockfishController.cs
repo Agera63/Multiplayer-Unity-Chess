@@ -22,6 +22,10 @@ public class StockfishController : IPlayerController
         coroutineRunner.StartCoroutine(GetStockfishMove());
     }
 
+    /// <summary>
+    /// Waits one second before querying Stockfish for the best move on the current board,
+    /// then fires the <see cref="onMoveReady"/> callback with the result.
+    /// </summary>
     IEnumerator GetStockfishMove()
     {
         yield return new WaitForSeconds(1f);

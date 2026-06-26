@@ -14,7 +14,10 @@ public class NetworkController : IPlayerController
         this.onMoveReady = onMoveReady;
     }
 
-    // This gets called when a move arrives from the opponent over the network
+    /// <summary>
+    /// Allows for a move to be received through the network.
+    /// </summary>
+    /// <param name="moveString">The move in the "e2-e4" format.</param>
     public void ReceiveMove(string moveString)
     {
         onMoveReady?.Invoke(moveString);

@@ -10,6 +10,10 @@ public class HumanController : IPlayerController
         this.onMoveReady = onMoveReady;
     }
 
+    /// <summary>
+    /// Attempts to make a move on the board.
+    /// </summary>
+    /// <param name="moveString">The move formated in the "e2-e4" format.</param>
     public void MakeMove(string moveString)
     {
         onMoveReady?.Invoke(moveString);
