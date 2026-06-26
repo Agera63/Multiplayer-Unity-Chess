@@ -19,6 +19,9 @@ public class CameraScript : NetworkBehaviour
             PositionCamera();
     }
 
+    /// <summary>
+    /// During multiplayer game, it allows for both cameras to be positioned in the correct positions.
+    /// </summary>
     public void PositionCamera()
     {
         Transform camTransform = GetComponentInChildren<Camera>().transform;
