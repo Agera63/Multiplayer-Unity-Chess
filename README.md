@@ -13,7 +13,7 @@ A chess game for Windows supporting three game modes: play against an AI, play l
 
 ## How to Play
 
-1. Open the game folder and launch **Chess.exe**
+1. Open the game folder and launch **ChessProject.exe**
 2. From the main menu, choose your game mode:
 
 ### 🤖 Play vs Bot
