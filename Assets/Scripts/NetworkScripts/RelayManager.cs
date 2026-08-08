@@ -43,31 +43,42 @@ public class RelayManager : MonoBehaviour
     /// </summary>
     private async void CreateRelay()
     {
-        if (NetworkManager.Singleton.IsListening)
+        if (string.IsNullOrEmpty(codeText.text))
         {
-            NetworkManager.Singleton.Shutdown();
-            await Task.Delay(500);
-        }
+            //Lets the user know that the code is being generated
+            codeText.text = "Loading...";
 
-        try
+            if (NetworkManager.Singleton.IsListening)
+            {
+                NetworkManager.Singleton.Shutdown();
+                await Task.Delay(500);
+            }
+
+            try
+            {
+                Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);
+                string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+                joinSection.SetActive(false);
+                codeText.text = "Code : " + joinCode;
+
+                NetworkManager.Singleton.GetComponent<UnityTransport>().SetHostRelayData(
+                    allocation.RelayServer.IpV4,
+                    (ushort)allocation.RelayServer.Port,
+                    allocation.AllocationIdBytes,
+                    allocation.Key,
+                    allocation.ConnectionData
+                );
+
+                NetworkManager.Singleton.StartHost();
+                NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            }
+            catch (RelayServiceException e) { Debug.Log(e); }
+        } else
         {
-            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);
-            string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-            joinSection.SetActive(false);
-            codeText.text = "Code : " + joinCode;
-
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetHostRelayData(
-                allocation.RelayServer.IpV4,
-                (ushort)allocation.RelayServer.Port,
-                allocation.AllocationIdBytes,
-                allocation.Key,
-                allocation.ConnectionData
-            );
-
-            NetworkManager.Singleton.StartHost();
-            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            //prevents the user from creating another game code
+            return;
         }
-        catch (RelayServiceException e) { Debug.Log(e); }
+        
     }
 
     /// <summary>
