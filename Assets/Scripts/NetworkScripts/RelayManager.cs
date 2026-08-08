@@ -7,6 +7,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -43,7 +44,7 @@ public class RelayManager : MonoBehaviour
     /// </summary>
     private async void CreateRelay()
     {
-        if (string.IsNullOrEmpty(codeText.text))
+        if (string.IsNullOrEmpty(codeText.text) || !codeText.text.Split(' ')[0].Equals("Code"))
         {
             //Lets the user know that the code is being generated
             codeText.text = "Loading...";
@@ -59,7 +60,12 @@ public class RelayManager : MonoBehaviour
                 Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);
                 string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
                 joinSection.SetActive(false);
-                codeText.text = "Code : " + joinCode;
+                
+                //Showing code
+                codeText.text = "Code : " + joinCode + "\n Code copied to clipboard!";
+
+                //Copies the code to the clipboard
+                GUIUtility.systemCopyBuffer = joinCode;
 
                 NetworkManager.Singleton.GetComponent<UnityTransport>().SetHostRelayData(
                     allocation.RelayServer.IpV4,
@@ -122,7 +128,13 @@ public class RelayManager : MonoBehaviour
     /// </summary>
     private async void JoinRelay()
     {
-        if (codeInput.text is null || codeInput.text.Equals(string.Empty)) return;
+        if (codeInput.text is null || codeInput.text.Equals(string.Empty)) {
+            codeText.text = "Please enter a code!";
+            return; 
+        }
+
+        //shows the app is trying to find the game code
+        codeText.text = "Loading...";
 
         if (NetworkManager.Singleton.IsListening)
         {
@@ -147,7 +159,10 @@ public class RelayManager : MonoBehaviour
 
             NetworkManager.Singleton.StartClient();
         }
-        catch (RelayServiceException e) { Debug.Log(e); }
+        catch (RelayServiceException e) {
+            codeText.text = "Lobby not found.";
+            Debug.Log(e); 
+        }
     }
 
     /// <summary>
