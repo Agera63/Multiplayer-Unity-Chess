@@ -5,6 +5,10 @@ public class CameraScript : NetworkBehaviour
 {
     public static CameraScript LocalInstance { get; private set; }
 
+    // Which color the camera is currently placed for (null = not placed yet).
+    private bool? placedForColor;
+    private bool isLocalOnlinePlayer;
+
     public override void OnNetworkSpawn()
     {
         if (!IsOwner)
@@ -14,8 +18,36 @@ public class CameraScript : NetworkBehaviour
         }
 
         LocalInstance = this;
+        isLocalOnlinePlayer = true;
+        placedForColor = null;
 
-        if (!NetworkGameManager.IsClientWaitingForColor)
+        SyncCameraWithColor();
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (LocalInstance == this)
+            LocalInstance = null;
+        isLocalOnlinePlayer = false;
+    }
+
+    /// <summary>
+    /// Safety net: the camera must always match the player's color. Whatever order the
+    /// spawn / scene load / color RPC happened in, this fixes any mismatch within one frame.
+    /// </summary>
+    private void LateUpdate()
+    {
+        if (isLocalOnlinePlayer)
+            SyncCameraWithColor();
+    }
+
+    private void SyncCameraWithColor()
+    {
+        // Client still waiting for the host to tell it its color: don't place the camera
+        // using a stale color from a previous game.
+        if (NetworkGameManager.IsClientWaitingForColor) return;
+
+        if (placedForColor != GameModeManager.instance.playerColor)
             PositionCamera();
     }
 
@@ -25,8 +57,9 @@ public class CameraScript : NetworkBehaviour
     public void PositionCamera()
     {
         Transform camTransform = GetComponentInChildren<Camera>().transform;
+        bool isWhite = GameModeManager.instance.playerColor;
 
-        if (!GameModeManager.instance.playerColor)
+        if (!isWhite)
         {
             // Black: far side
             camTransform.position = new Vector3(0.5f, 5.5f, 10f);
@@ -38,5 +71,7 @@ public class CameraScript : NetworkBehaviour
             camTransform.position = new Vector3(0.5f, 5.5f, -2.5f);
             camTransform.rotation = Quaternion.Euler(45, 0, 0);
         }
+
+        placedForColor = isWhite;
     }
 }

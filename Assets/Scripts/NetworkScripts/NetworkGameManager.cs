@@ -7,15 +7,19 @@ public class NetworkGameManager : NetworkBehaviour
     public static NetworkGameManager Instance;
     public static bool IsClientWaitingForColor = false;
 
+    /// <summary>True when the local player is leaving on purpose (Exit button), so our own disconnect isn't treated as the opponent leaving.</summary>
+    public static bool LeavingOnPurpose = false;
+
     public NetworkController networkController;
     public static event Action OnOpponentDisconnected;
 
     private void Awake()
     {
         Instance = this;
+        LeavingOnPurpose = false;
 
-        if (NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsHost)
-            IsClientWaitingForColor = true;
+        // Assign (not just set-to-true) so a stale value from a previous game can never stick.
+        IsClientWaitingForColor = NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsHost;
     }
 
     /// <summary>
@@ -91,6 +95,11 @@ public class NetworkGameManager : NetworkBehaviour
     {
         NetworkManager.Singleton.OnClientDisconnectCallback -= OnPlayerDisconnected;
         IsClientWaitingForColor = false;
+
+        // Backup: if the network is shutting down and we didn't cause it, the opponent is gone.
+        if (!LeavingOnPurpose && NetworkManager.Singleton.ShutdownInProgress)
+            OnOpponentDisconnected?.Invoke();
+
         OnOpponentDisconnected = null;
     }
 
@@ -100,7 +109,20 @@ public class NetworkGameManager : NetworkBehaviour
     /// <param name="clientId">The network ID of the client that disconnected.</param>
     private void OnPlayerDisconnected(ulong clientId)
     {
-        if (clientId != NetworkManager.Singleton.LocalClientId)
+        // We pressed Exit ourselves: not the opponent's doing.
+        if (LeavingOnPurpose) return;
+
+        // Host: another client left, so clientId is the opponent's.
+        // Client: Netcode only reports our OWN id when the host goes away,
+        // so any disconnect we didn't cause means the host left.
+        if (NetworkManager.Singleton.IsHost)
+        {
+            if (clientId != NetworkManager.Singleton.LocalClientId)
+                OnOpponentDisconnected?.Invoke();
+        }
+        else
+        {
             OnOpponentDisconnected?.Invoke();
+        }
     }
 }

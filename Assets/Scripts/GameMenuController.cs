@@ -20,6 +20,7 @@ public class GameMenuController : MonoBehaviour
         if (NetworkManager.Singleton != null &&
             (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsClient))
         {
+            NetworkGameManager.LeavingOnPurpose = true;
             NetworkManager.Singleton.Shutdown();
         }
 
