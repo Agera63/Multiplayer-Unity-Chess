@@ -11,9 +11,21 @@ namespace ChessClient
         private static readonly int SEARCH_DEPTH = 15;
         private static readonly string[] UCI_INIT_COMMANDS = { "uci" };
 
+        // Stockfish "Skill Level" (0-20). -1 means it has not been rolled yet.
+        // Rolled once per game so the bot's strength stays consistent between moves.
+        private static int skillLevel = -1;
+
         private static Process stockfishProcess;
         private static StreamWriter processWriter;
         private static StreamReader processReader;
+
+        /// <summary>
+        /// Rolls a random Skill Level (0-20) for the bot. Call once at the start of each game.
+        /// </summary>
+        public static void RollRandomSkill()
+        {
+            skillLevel = UnityEngine.Random.Range(0, 21); // max is exclusive, so 0-20
+        }
 
         /// <summary>
         /// Gets the best move from Stockfish for the current board position.
@@ -38,6 +50,7 @@ namespace ChessClient
         /// <summary>
         /// Starts the Stockfish process and initializes the UCI protocol,
         /// setting up the standard input/output streams for communication.
+        /// Also applies the bot's Skill Level.
         /// </summary>
         private static void InitializeStockfishProcess()
         {
@@ -56,6 +69,12 @@ namespace ChessClient
 
             SendCommand("uci");
             WaitForUciOk();
+
+            if (skillLevel < 0) RollRandomSkill(); // safety net if it was never rolled
+
+            SendCommand("setoption name Skill Level value " + skillLevel);
+            SendCommand("isready");
+            WaitForReadyOk();
         }
 
         /// <summary>
@@ -184,6 +203,24 @@ namespace ChessClient
                 }
             }
             throw new IOException("Failed to initialize UCI protocol with Stockfish");
+        }
+
+        /// <summary>
+        /// Blocks until Stockfish responds with "readyok", confirming it has
+        /// finished applying the options that were sent.
+        /// </summary>
+        /// <exception cref="IOException">Thrown if Stockfish does not respond with "readyok".</exception>
+        private static void WaitForReadyOk()
+        {
+            string line;
+            while ((line = processReader.ReadLine()) != null)
+            {
+                if ("readyok".Equals(line))
+                {
+                    return;
+                }
+            }
+            throw new IOException("Stockfish did not respond with readyok");
         }
 
         /// <summary>
